@@ -10,7 +10,7 @@ A production-ready and standalone React application demonstrating advanced patte
 - Internationalization with react-i18next and locale-aware formatting
 - Tailwind CSS v4 with shadcn/ui patterns
 - MSW for API mocking in development and tests
-- 100% test coverage with Vitest + mutation testing
+- 80% test coverage with Vitest + mutation testing
 - TypeScript strict mode with ESLint flat config
 - Route-level code splitting and performance optimization
 - Automated CI/CD with GitHub Actions
@@ -100,7 +100,7 @@ npm run preview
 # Run tests
 npm test
 
-# Run with coverage (100% enforced)
+# Run with coverage (80% enforced)
 npm run test:coverage
 
 # Run with UI
@@ -138,7 +138,7 @@ VITE_ENABLE_MOCKS=true
 
 ## Code Quality Standards
 
-- 100% test coverage enforced
+- 80% test coverage enforced
 - Mutation testing for test effectiveness
 - TypeScript strict mode
 - Zero linting errors
@@ -147,7 +147,7 @@ VITE_ENABLE_MOCKS=true
 ## Contributing
 
 1. Follow the existing code structure
-2. Maintain 100% test coverage
+2. Maintain 80% test coverage
 3. Ensure all tests pass including mutation tests
 4. Run `npm run lint:fix` and `npm run format` before committing
 5. Write meaningful commit messages
