@@ -137,3 +137,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Sonar
+.scannerwork
+
+# Mac
+.DS_Store
+_temp
+
+# Mutation testing
+reports/

@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "React Haladó Alkalmazás"
+  },
+  "nav": {
+    "dashboard": "Irányítópult",
+    "settings": "Beállítások"
+  },
+  "dashboard": {
+    "title": "Irányítópult",
+    "subtitle": "Üdvözlünk vissza! Itt van az áttekintésed.",
+    "totalRevenue": "Összes bevétel",
+    "subscriptions": "Előfizetések",
+    "sales": "Értékesítések",
+    "activeUsers": "Aktív felhasználók",
+    "monthlyOverview": "Havi áttekintés",
+    "loading": "Irányítópult adatainak betöltése...",
+    "error": "Hiba történt az irányítópult adatainak betöltésekor. Kérjük, próbálja újra később."
+  },
+  "settings": {
+    "title": "Beállítások",
+    "subtitle": "Fiók beállításainak és preferenciáinak kezelése.",
+    "profileSettings": "Profil beállítások",
+    "name": "Név",
+    "email": "E-mail",
+    "notifications": "Értesítések engedélyezése",
+    "saveChanges": "Változtatások mentése",
+    "saving": "Mentés...",
+    "updateSuccess": "Beállítások sikeresen frissítve!",
+    "updateError": "Nem sikerült frissíteni a beállításokat. Kérjük, próbálja újra.",
+    "loading": "Beállítások betöltése...",
+    "loadError": "Hiba történt a beállítások betöltésekor. Kérjük, próbálja újra később.",
+    "validation": {
+      "nameRequired": "A név megadása kötelező",
+      "emailInvalid": "Érvénytelen e-mail cím"
+    }
+  },
+  "common": {
+    "loading": "Betöltés...",
+    "error": "Hiba történt",
+    "retry": "Újra"
+  }
+}
