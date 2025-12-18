@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "React Advanced App"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back! Here is your overview.",
+    "totalRevenue": "Total Revenue",
+    "subscriptions": "Subscriptions",
+    "sales": "Sales",
+    "activeUsers": "Active Users",
+    "monthlyOverview": "Monthly Overview",
+    "loading": "Loading dashboard data...",
+    "error": "Error loading dashboard data. Please try again later."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences.",
+    "profileSettings": "Profile Settings",
+    "name": "Name",
+    "email": "Email",
+    "notifications": "Enable notifications",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateSuccess": "Settings updated successfully!",
+    "updateError": "Failed to update settings. Please try again.",
+    "loading": "Loading settings...",
+    "loadError": "Error loading settings. Please try again later.",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email address"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry"
+  }
+}

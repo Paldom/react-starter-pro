@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: Dashboard API
+  version: 1.0.0
+  description: API for dashboard and settings management
+
+servers:
+  - url: /api
+    description: Development server
+
+paths:
+  /dashboard/stats:
+    get:
+      summary: Get dashboard statistics
+      operationId: getDashboardStats
+      tags:
+        - dashboard
+      responses:
+        '200':
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+              example:
+                totalRevenue: 125000
+                subscriptions: 1234
+                sales: 5678
+                activeUsers: 2345
+
+  /dashboard/chart:
+    get:
+      summary: Get dashboard chart data
+      operationId: getDashboardChart
+      tags:
+        - dashboard
+      responses:
+        '200':
+          description: Dashboard chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChartDataPoint'
+              example:
+                - name: 'Jan'
+                  value: 4000
+                - name: 'Feb'
+                  value: 3000
+                - name: 'Mar'
+                  value: 5000
+                - name: 'Apr'
+                  value: 4500
+                - name: 'May'
+                  value: 6000
+                - name: 'Jun'
+                  value: 5500
+
+  /settings:
+    get:
+      summary: Get user settings
+      operationId: getUserSettings
+      tags:
+        - settings
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+              example:
+                name: 'John Doe'
+                email: 'john@example.com'
+                notifications: true
+
+    put:
+      summary: Update user settings
+      operationId: updateUserSettings
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+            example:
+              name: 'Jane Doe'
+              email: 'jane@example.com'
+              notifications: false
+      responses:
+        '200':
+          description: Updated user settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+              example:
+                name: 'Jane Doe'
+                email: 'jane@example.com'
+                notifications: false
+
+components:
+  schemas:
+    DashboardStats:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        subscriptions:
+          type: number
+        sales:
+          type: number
+        activeUsers:
+          type: number
+      required:
+        - totalRevenue
+        - subscriptions
+        - sales
+        - activeUsers
+
+    ChartDataPoint:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: number
+      required:
+        - name
+        - value
+
+    UserSettings:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        notifications:
+          type: boolean
+      required:
+        - name
+        - email
+        - notifications

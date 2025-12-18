@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SideNav } from './SideNav'
@@ -9,6 +9,10 @@ const mockUsePathname = vi.mocked(usePathname)
 describe('SideNav', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/')
+  })
+
+  afterEach(() => {
+    mockUsePathname.mockReset()
   })
 
   it('renders navigation links when expanded', () => {

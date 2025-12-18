@@ -57,7 +57,7 @@ void i18n.use(initReactI18next).init({
 })
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/',
+  usePathname: vi.fn(() => '/'),
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),

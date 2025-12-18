@@ -29,4 +29,25 @@ describe('AppRouteError', () => {
 
     consoleError.mockRestore()
   })
+
+  it('renders status text when the route error is a response', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const router = createMemoryRouter([
+      {
+        path: '/',
+        loader: () => {
+          throw new Response('Boom', { status: 500, statusText: 'Server exploded' })
+        },
+        element: <div />,
+        errorElement: <AppRouteError />,
+      },
+    ])
+
+    render(<RouterProvider router={router} />)
+
+    expect(await screen.findByText(/server exploded/i)).toBeInTheDocument()
+
+    consoleError.mockRestore()
+  })
 })

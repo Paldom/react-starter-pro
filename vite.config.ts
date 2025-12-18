@@ -15,7 +15,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(dirname, './src'),
     },
   },
   build: {
@@ -33,17 +33,22 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    exclude: ['**/node_modules/**', '**/.stryker-tmp/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.test.{ts,tsx}',
+        'src/**/*.stories.{ts,tsx}',
+        'src/stories/**',
+        '**/.stryker-tmp/**',
         'src/main.tsx',
         'src/mocks/**',
         'src/shared/api/generated/**',
         'src/shared/types/**',
         'src/vite-env.d.ts',
+        'src/**/*.d.ts',
       ],
       thresholds: {
         statements: 80,
@@ -52,30 +57,33 @@ export default defineConfig({
         lines: 80,
       },
     },
-    projects: [
-      {
-        plugins: [
-          // The plugin will run tests for the stories defined in your Storybook config
-          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-          storybookTest({
-            configDir: path.join(dirname, '.storybook'),
-          }),
-        ],
-        test: {
-          name: 'storybook',
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({}),
-            instances: [
-              {
-                browser: 'chromium',
+    projects:
+      process.env.VITEST_BROWSER === 'true'
+        ? [
+            {
+              plugins: [
+                // The plugin will run tests for the stories defined in your Storybook config
+                // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+                storybookTest({
+                  configDir: path.join(dirname, '.storybook'),
+                }),
+              ],
+              test: {
+                name: 'storybook',
+                browser: {
+                  enabled: true,
+                  headless: true,
+                  provider: playwright({}),
+                  instances: [
+                    {
+                      browser: 'chromium',
+                    },
+                  ],
+                },
+                setupFiles: ['.storybook/vitest.setup.ts'],
               },
-            ],
-          },
-          setupFiles: ['.storybook/vitest.setup.ts'],
-        },
-      },
-    ],
+            },
+          ]
+        : undefined,
   },
 })
