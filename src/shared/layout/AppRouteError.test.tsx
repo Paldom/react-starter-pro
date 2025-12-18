@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 import { render, screen } from '@testing-library/react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -37,6 +36,7 @@ describe('AppRouteError', () => {
       {
         path: '/',
         loader: () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error -- Response is valid for react-router loaders
           throw new Response('Boom', { status: 500, statusText: 'Server exploded' })
         },
         element: <div />,

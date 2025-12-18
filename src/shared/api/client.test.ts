@@ -1,15 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+interface AxiosConfig {
+  headers: Record<string, string | undefined>
+  [key: string]: unknown
+}
+
 const { requestMock, interceptorRef } = vi.hoisted(() => ({
   requestMock: vi.fn(),
-  interceptorRef: { current: undefined as ((config: Record<string, any>) => Record<string, any>) | undefined },
+  interceptorRef: { current: undefined as ((config: AxiosConfig) => AxiosConfig) | undefined },
 }))
 
 vi.mock('axios', () => {
   const create = vi.fn(() => {
     const interceptors = {
       request: {
-        use: (handler: (config: Record<string, any>) => Record<string, any>) => {
+        use: (handler: (config: AxiosConfig) => AxiosConfig) => {
           interceptorRef.current = handler
           return handler
         },
@@ -44,14 +49,14 @@ describe('shared/api/client', () => {
 
   it('attaches bearer token from localStorage when present', () => {
     localStorage.setItem('authToken', 'token-123')
-    const initialConfig = { headers: {} }
+    const initialConfig: AxiosConfig = { headers: {} }
     const config = interceptorRef.current?.(initialConfig) ?? initialConfig
 
     expect(config.headers.Authorization).toBe('Bearer token-123')
   })
 
   it('leaves headers unchanged when no token exists', () => {
-    const initialConfig = { headers: {} }
+    const initialConfig: AxiosConfig = { headers: {} }
     const config = interceptorRef.current?.(initialConfig) ?? initialConfig
 
     expect(config.headers.Authorization).toBeUndefined()

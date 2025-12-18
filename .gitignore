@@ -150,6 +150,7 @@ _temp
 
 # Mutation testing
 reports/
+.stryker-tmp/
 
 *storybook.log
 storybook-static

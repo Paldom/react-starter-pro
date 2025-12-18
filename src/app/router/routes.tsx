@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/shared/layout/AppLayout'
 import { AppRouteError } from '@/shared/layout/AppRouteError'
