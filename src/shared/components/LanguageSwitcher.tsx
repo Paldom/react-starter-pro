@@ -1,4 +1,6 @@
-import { useTranslation } from 'react-i18next'
+'use client'
+
+import { useTranslation } from '@/i18n/client'
 import { Button } from './Button'
 
 export function LanguageSwitcher() {

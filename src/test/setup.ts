@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom/vitest'
+import React from 'react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
+import { vi } from 'vitest'
 import { server } from '@/mocks/server'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
@@ -52,6 +54,25 @@ void i18n.use(initReactI18next).init({
     },
   },
   interpolation: { escapeValue: false },
+})
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}))
+
+vi.mock('next/link', () => {
+  return {
+    __esModule: true,
+    default: React.forwardRef<
+      HTMLAnchorElement,
+      React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }
+    >(({ href, ...props }, ref) => React.createElement('a', { ref, href, ...props })),
+  }
 })
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))

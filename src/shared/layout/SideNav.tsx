@@ -1,13 +1,16 @@
+'use client'
+
 import { memo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Settings } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n/client'
 import { cn } from '@/shared/lib/utils'
 import { useUIStore } from '@/shared/store/ui'
 
 export const SideNav = memo(() => {
   const { t } = useTranslation()
-  const location = useLocation()
+  const pathname = usePathname()
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
 
   const navItems = [
@@ -24,13 +27,13 @@ export const SideNav = memo(() => {
     >
       <nav className="flex-1 space-y-1 p-4" aria-label="Main navigation">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.to
+          const isActive = pathname === item.to
           const Icon = item.icon
 
           return (
             <Link
               key={item.to}
-              to={item.to}
+              href={item.to}
               className={cn(
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive

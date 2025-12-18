@@ -1,6 +1,8 @@
+'use client'
+
 import { memo } from 'react'
 import { Menu, User } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n/client'
 import { Button } from '@/shared/components/Button'
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher'
 import { useUIStore } from '@/shared/store/ui'

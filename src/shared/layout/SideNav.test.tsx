@@ -1,19 +1,19 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { usePathname } from 'next/navigation'
 import { SideNav } from './SideNav'
 import { useUIStore } from '@/shared/store/ui'
 
-function renderWithRouter(ui: React.ReactElement, { initialEntries = ['/'] } = {}) {
-  return render(
-    <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
-  )
-}
+const mockUsePathname = vi.mocked(usePathname)
 
 describe('SideNav', () => {
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue('/')
+  })
+
   it('renders navigation links when expanded', () => {
     useUIStore.setState({ sidebarCollapsed: false })
-    renderWithRouter(<SideNav />)
+    render(<SideNav />)
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
@@ -21,7 +21,8 @@ describe('SideNav', () => {
 
   it('highlights active route', () => {
     useUIStore.setState({ sidebarCollapsed: false })
-    renderWithRouter(<SideNav />, { initialEntries: ['/'] })
+    mockUsePathname.mockReturnValue('/')
+    render(<SideNav />)
 
     const dashboardLink = screen.getByRole('link', { name: /dashboard/i })
     expect(dashboardLink).toHaveAttribute('aria-current', 'page')
@@ -29,7 +30,7 @@ describe('SideNav', () => {
 
   it('hides labels when collapsed', () => {
     useUIStore.setState({ sidebarCollapsed: true })
-    renderWithRouter(<SideNav />)
+    render(<SideNav />)
 
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
     expect(screen.queryByText('Settings')).not.toBeInTheDocument()
@@ -37,7 +38,8 @@ describe('SideNav', () => {
 
   it('highlights settings route when active', () => {
     useUIStore.setState({ sidebarCollapsed: false })
-    renderWithRouter(<SideNav />, { initialEntries: ['/settings'] })
+    mockUsePathname.mockReturnValue('/settings')
+    render(<SideNav />)
 
     const settingsLink = screen.getByRole('link', { name: /settings/i })
     expect(settingsLink).toHaveAttribute('aria-current', 'page')

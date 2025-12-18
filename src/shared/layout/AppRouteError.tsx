@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import { Button } from '@/shared/components/Button'
 import {
   isRouteErrorResponse,
@@ -5,22 +6,17 @@ import {
   useRouteError,
 } from 'react-router-dom'
 
-function getErrorMessage(error: unknown) {
-  if (isRouteErrorResponse(error)) {
-    return error.statusText || `Request failed with status ${error.status}`
-  }
-
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'An unexpected error occurred.'
-}
-
 export function AppRouteError() {
   const navigate = useNavigate()
   const error = useRouteError()
-  const message = getErrorMessage(error)
+
+  let message = 'An unexpected error occurred.'
+
+  if (isRouteErrorResponse(error)) {
+    message = error.statusText || `Request failed with status ${error.status}`
+  } else if (error instanceof Error) {
+    message = error.message
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-muted/20 p-8 text-center">

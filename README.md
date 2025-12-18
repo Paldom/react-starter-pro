@@ -8,7 +8,8 @@ A production-ready and standalone React application demonstrating advanced patte
 - Type-safe API client generation (OpenAPI + Orval)
 - Server state with TanStack Query, client state with Zustand
 - Internationalization with react-i18next and locale-aware formatting
-- Tailwind CSS v4 with shadcn/ui patterns
+- Tailwind CSS v4 with shadcn/ui components
+- Storybook with shadcn/ui story registry
 - MSW for API mocking in development and tests
 - 80% test coverage with Vitest + mutation testing
 - TypeScript strict mode with ESLint flat config
@@ -18,6 +19,10 @@ A production-ready and standalone React application demonstrating advanced patte
 ## Project Structure
 
 ```
+.storybook/                       # Storybook configuration
+├── main.ts                       # Storybook main config
+└── preview.ts                    # Global decorators and styles
+
 src/
 ├── app/                          # Application configuration
 │   ├── providers/                # Provider composition layer
@@ -36,6 +41,18 @@ src/
 │   └── settings/
 │       ├── hooks/                # Feature wrappers for Orval hooks
 │       └── pages/                # Settings pages
+│
+├── components/                   # shadcn/ui components
+│   ├── ui/                       # Base UI components
+│   │   ├── accordion.tsx
+│   │   ├── alert.tsx
+│   │   └── button.tsx
+│   ├── accordion.stories.tsx     # Storybook stories
+│   ├── alert.stories.tsx
+│   └── button.stories.tsx
+│
+├── lib/                          # Shared utilities
+│   └── utils.ts                  # cn() utility for class merging
 │
 ├── shared/                       # Shared/reusable code
 │   ├── api/                      # API client & generated code
@@ -68,12 +85,17 @@ src/
 ├── i18n.ts                       # i18next configuration
 └── i18next.d.ts                  # TypeScript type definitions
 
+app/
+└── globals.css                   # Tailwind + shadcn CSS variables
+
 public/
 └── locales/                      # Translation files
     ├── en/                       # English translations
     │   └── common.json
     └── hu/                       # Hungarian translations
         └── common.json
+
+components.json                   # shadcn/ui configuration
 ```
 
 ## Getting Started
@@ -108,6 +130,21 @@ npm run test:ui
 
 # Mutation testing
 npm run test:mutation
+```
+
+## Storybook
+
+```bash
+# Run Storybook (http://localhost:6006)
+npm run storybook
+
+# Build static Storybook
+npm run build-storybook
+
+# Add shadcn/ui components with stories from the registry
+npx shadcn@latest add @storybook/button-story
+npx shadcn@latest add @storybook/card-story
+npx shadcn@latest add @storybook/dialog-story
 ```
 
 ## Code Quality
@@ -167,9 +204,10 @@ VITE_ENABLE_MOCKS=true
 - **React Hook Form 7.63** - Forms
 - **Zod 4.1** - Schema validation
 - **Orval 7.13** - OpenAPI code generation
-- **Vitest 3.2** - Testing framework
+- **Vitest 4.0** - Testing framework
 - **MSW 2.11** - API mocking
 - **Stryker 9.1** - Mutation testing
+- **Storybook 10.1** - Component documentation
 
 ## License
 
