@@ -28,7 +28,9 @@ void i18next
     },
   })
 
-export function useTranslation(lng: Locale = defaultLocale, ns: string = 'common') {
+type Namespace = Parameters<typeof useTranslationOrg>[0]
+
+export function useTranslation(lng: Locale = defaultLocale, ns: Namespace = 'common') {
   const ret = useTranslationOrg(ns)
   const { i18n } = ret
   const [activeLng, setActiveLng] = useState(i18n.resolvedLanguage)

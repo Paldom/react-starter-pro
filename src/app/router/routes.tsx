@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
-import { createBrowserRouter, type Router } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/shared/layout/AppLayout'
 import { AppRouteError } from '@/shared/layout/AppRouteError'
 
-export const router: Router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
