@@ -102,6 +102,100 @@ paths:
                 email: 'jane@example.com'
                 notifications: false
 
+  /todos:
+    get:
+      summary: Get all todos
+      operationId: getTodos
+      tags:
+        - todos
+      responses:
+        '200':
+          description: A list of todos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+              example:
+                - id: '1'
+                  title: 'Learn OpenAPI'
+                  completed: true
+                - id: '2'
+                  title: 'Build Todos feature'
+                  completed: false
+    post:
+      summary: Create a new todo
+      operationId: createTodo
+      tags:
+        - todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoPayload'
+      responses:
+        '201':
+          description: Created todo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+    
+  /todos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the todo to retrieve or modify
+    get:
+      summary: Get a todo by ID
+      operationId: getTodoById
+      tags:
+        - todos
+      responses:
+        '200':
+          description: A single todo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo not found
+    put:
+      summary: Update a todo by ID
+      operationId: updateTodoById
+      tags:
+        - todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoPayload'
+      responses:
+        '200':
+          description: Updated todo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo not found
+    delete:
+      summary: Delete a todo by ID
+      operationId: deleteTodoById
+      tags:
+        - todos
+      responses:
+        '204':
+          description: Todo deleted
+        '404':
+          description: Todo not found
+
 components:
   schemas:
     DashboardStats:
@@ -145,3 +239,37 @@ components:
         - name
         - email
         - notifications
+
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        completed:
+          type: boolean
+      required:
+        - id
+        - title
+        - completed
+
+    CreateTodoPayload:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
+          default: false
+      required:
+        - title
+
+    UpdateTodoPayload:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
