@@ -4,7 +4,8 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "settings": "Settings"
+    "settings": "Settings",
+    "todos": "Todos"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -16,6 +17,18 @@
     "monthlyOverview": "Monthly Overview",
     "loading": "Loading dashboard data...",
     "error": "Error loading dashboard data. Please try again later."
+  },
+  "todos": {
+    "title": "Todos",
+    "subtitle": "Keep track of your tasks here.",
+    "loading": "Loading todos...",
+    "error": "Error loading todos. Please try again later.",
+    "addTodo": "Add New Todo",
+    "newTodoPlaceholder": "What needs to be done?",
+    "add": "Add",
+    "myTodos": "My Todos",
+    "noTodos": "No todos yet. Add one above!",
+    "completed": "Completed"
   },
   "settings": {
     "title": "Settings",

@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface UserSettings {
-  name: string;
-  email: string;
-  notifications: boolean;
+export interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
 }

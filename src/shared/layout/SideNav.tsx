@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Settings } from 'lucide-react'
+import { LayoutDashboard, Settings, ListTodo } from 'lucide-react'
 import { useTranslation } from '@/i18n/client'
 import { cn } from '@/shared/lib/utils'
 import { useUIStore } from '@/shared/store/ui'
@@ -15,6 +15,7 @@ export const SideNav = memo(() => {
 
   const navItems = [
     { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: '/todos', label: t('nav.todos'), icon: ListTodo },
     { to: '/settings', label: t('nav.settings'), icon: Settings },
   ] as const
 

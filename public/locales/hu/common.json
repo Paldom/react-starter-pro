@@ -4,7 +4,8 @@
   },
   "nav": {
     "dashboard": "Irányítópult",
-    "settings": "Beállítások"
+    "settings": "Beállítások",
+    "todos": "Feladatok"
   },
   "dashboard": {
     "title": "Irányítópult",
@@ -16,6 +17,18 @@
     "monthlyOverview": "Havi áttekintés",
     "loading": "Irányítópult adatainak betöltése...",
     "error": "Hiba történt az irányítópult adatainak betöltésekor. Kérjük, próbálja újra később."
+  },
+  "todos": {
+    "title": "Feladatok",
+    "subtitle": "Kövesd nyomon a feladataidat itt.",
+    "loading": "Feladatok betöltése...",
+    "error": "Hiba történt a feladatok betöltésekor. Kérjük, próbálja újra később.",
+    "addTodo": "Új feladat hozzáadása",
+    "newTodoPlaceholder": "Mit kell tenni?",
+    "add": "Hozzáadás",
+    "myTodos": "Saját feladatok",
+    "noTodos": "Még nincsenek feladatok. Adj hozzá egyet fent!",
+    "completed": "Befejezett"
   },
   "settings": {
     "title": "Beállítások",
