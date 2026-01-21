@@ -21,9 +21,13 @@
   "todos": {
     "title": "Todos",
     "subtitle": "Keep track of your tasks here.",
-    "listTitle": "Your Todo List",
     "loading": "Loading todos...",
     "error": "Error loading todos. Please try again later.",
+    "addTodo": "Add New Todo",
+    "newTodoPlaceholder": "What needs to be done?",
+    "add": "Add",
+    "myTodos": "My Todos",
+    "noTodos": "No todos yet. Add one above!",
     "completed": "Completed"
   },
   "settings": {

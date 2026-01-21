@@ -7,6 +7,8 @@
  */
 
 export * from './chartDataPoint';
+export * from './createTodoPayload';
 export * from './dashboardStats';
 export * from './todo';
+export * from './updateTodoPayload';
 export * from './userSettings';

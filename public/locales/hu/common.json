@@ -21,9 +21,13 @@
   "todos": {
     "title": "Feladatok",
     "subtitle": "Kövesd nyomon a feladataidat itt.",
-    "listTitle": "A feladatlistád",
     "loading": "Feladatok betöltése...",
     "error": "Hiba történt a feladatok betöltésekor. Kérjük, próbálja újra később.",
+    "addTodo": "Új feladat hozzáadása",
+    "newTodoPlaceholder": "Mit kell tenni?",
+    "add": "Hozzáadás",
+    "myTodos": "Saját feladatok",
+    "noTodos": "Még nincsenek feladatok. Adj hozzá egyet fent!",
     "completed": "Befejezett"
   },
   "settings": {
