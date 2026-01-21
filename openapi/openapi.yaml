@@ -102,6 +102,22 @@ paths:
                 email: 'jane@example.com'
                 notifications: false
 
+  /todos:
+    get:
+      summary: Get all todos
+      operationId: getTodos
+      tags:
+        - todos
+      responses:
+        '200':
+          description: A list of todos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+
 components:
   schemas:
     DashboardStats:
@@ -145,3 +161,18 @@ components:
         - name
         - email
         - notifications
+
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        completed:
+          type: boolean
+      required:
+        - id
+        - title
+        - completed

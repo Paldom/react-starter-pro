@@ -24,6 +24,14 @@ export const router = createBrowserRouter([
         },
         errorElement: <AppRouteError />,
       },
+      {
+        path: 'todos',
+        lazy: async () => {
+          const { TodosPage } = await import('@/features/todos/pages/TodosPage')
+          return { Component: TodosPage }
+        },
+        errorElement: <AppRouteError />,
+      },
     ],
   },
 ])
