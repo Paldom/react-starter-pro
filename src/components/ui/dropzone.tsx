@@ -33,7 +33,7 @@ export function Dropzone({
   const activeLabel = labels?.active ?? t('document.dropzoneActive')
 
   const handleDragOver = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: React.DragEvent<HTMLButtonElement>) => {
       e.preventDefault()
       e.stopPropagation()
       if (!disabled) {
@@ -43,14 +43,17 @@ export function Dropzone({
     [disabled]
   )
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragOver(false)
-  }, [])
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDragOver(false)
+    },
+    []
+  )
 
   const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: React.DragEvent<HTMLButtonElement>) => {
       e.preventDefault()
       e.stopPropagation()
       setIsDragOver(false)
