@@ -1,29 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { AppLayout } from '@/shared/layout/AppLayout'
-import { AppRouteError } from '@/shared/layout/AppRouteError'
+import { ChatShell } from '@/components/chat-shell'
+import { AppRouteError } from '@/components/app-route-error'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppLayout />,
+    element: <ChatShell />,
     errorElement: <AppRouteError />,
-    children: [
-      {
-        index: true,
-        lazy: async () => {
-          const { DashboardPage } = await import('@/features/dashboard/pages/DashboardPage')
-          return { Component: DashboardPage }
-        },
-        errorElement: <AppRouteError />,
-      },
-      {
-        path: 'settings',
-        lazy: async () => {
-          const { SettingsPage } = await import('@/features/settings/pages/SettingsPage')
-          return { Component: SettingsPage }
-        },
-        errorElement: <AppRouteError />,
-      },
-    ],
   },
 ])

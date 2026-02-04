@@ -5,13 +5,14 @@ interface AxiosConfig {
   [key: string]: unknown
 }
 
-const { requestMock, interceptorRef } = vi.hoisted(() => ({
+const { requestMock, interceptorRef, createMock } = vi.hoisted(() => ({
   requestMock: vi.fn(),
   interceptorRef: { current: undefined as ((config: AxiosConfig) => AxiosConfig) | undefined },
+  createMock: vi.fn(),
 }))
 
 vi.mock('axios', () => {
-  const create = vi.fn(() => {
+  const create = createMock.mockImplementation(() => {
     const interceptors = {
       request: {
         use: (handler: (config: AxiosConfig) => AxiosConfig) => {
@@ -53,6 +54,30 @@ describe('shared/api/client', () => {
     const config = interceptorRef.current?.(initialConfig) ?? initialConfig
 
     expect(config.headers.Authorization).toBe('Bearer token-123')
+  })
+
+  it('configures axios with base URL and timeout defaults', () => {
+    const config = createMock.mock.calls[0]?.[0] as
+      | { baseURL?: string; timeout?: number }
+      | undefined
+
+    expect(config?.baseURL).toBe('/api')
+    expect(config?.timeout).toBe(10000)
+  })
+
+  it('skips localStorage when window is undefined', () => {
+    const getItem = vi.spyOn(localStorage, 'getItem')
+    const originalWindow = globalThis.window
+    // @ts-expect-error - simulate non-browser environment
+    globalThis.window = undefined
+
+    const initialConfig: AxiosConfig = { headers: {} }
+    interceptorRef.current?.(initialConfig)
+
+    expect(getItem).not.toHaveBeenCalled()
+
+    globalThis.window = originalWindow
+    getItem.mockRestore()
   })
 
   it('leaves headers unchanged when no token exists', () => {

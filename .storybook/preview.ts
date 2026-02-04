@@ -1,7 +1,8 @@
-import type { Preview } from '@storybook/nextjs-vite'
+import type { Preview } from '@storybook/react-vite'
 
 // Import Tailwind CSS and shadcn global styles
-import '../app/globals.css'
+import '../src/index.css'
+import '../src/i18n'
 
 const preview: Preview = {
   parameters: {

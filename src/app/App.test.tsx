@@ -1,21 +1,32 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { App } from './App'
+import { resetUIStore } from '@/test/utils'
 
 describe('App', () => {
-  it('renders dashboard page by default', async () => {
+  beforeEach(() => {
+    resetUIStore()
+  })
+
+  it('renders assistant thread empty state by default', async () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(
+        screen.getByText('Start a conversation by typing a message below.')
+      ).toBeInTheDocument()
     })
   })
 
-  it('renders application header', async () => {
+  it('renders active project and chat in the header breadcrumb', async () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText('React Advanced App')).toBeInTheDocument()
+      const breadcrumb = screen.getByLabelText('breadcrumb')
+      expect(within(breadcrumb).getByText('Work')).toBeInTheDocument()
+      expect(
+        within(breadcrumb).getByText('Q1 metrics summary')
+      ).toBeInTheDocument()
     })
   })
 })

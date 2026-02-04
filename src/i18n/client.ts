@@ -1,32 +1,6 @@
-'use client'
-
-import i18next from 'i18next'
-import { initReactI18next, useTranslation as useTranslationOrg } from 'react-i18next'
-import resourcesToBackend from 'i18next-resources-to-backend'
+import { useTranslation as useTranslationOrg } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { type Locale, defaultLocale, locales } from './config'
-
-const runsOnServerSide = typeof window === 'undefined'
-
-void i18next
-  .use(initReactI18next)
-  .use(
-    resourcesToBackend((language: string, namespace: string) =>
-      import(`../../public/locales/${language}/${namespace}.json`)
-    )
-  )
-  .init({
-    supportedLngs: locales,
-    fallbackLng: defaultLocale,
-    lng: undefined,
-    fallbackNS: 'common',
-    defaultNS: 'common',
-    ns: 'common',
-    preload: runsOnServerSide ? locales : [],
-    interpolation: {
-      escapeValue: false,
-    },
-  })
+import { type Locale, defaultLocale } from './config'
 
 type Namespace = Parameters<typeof useTranslationOrg>[0]
 

@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from '@/app/App'
-import './i18n'
+import i18n from './i18n'
 import './index.css'
 import type { SetupWorker } from 'msw/browser'
 
@@ -9,6 +9,14 @@ type BrowserMocksModule = { worker: SetupWorker }
 
 async function enableMocks() {
   if (!import.meta.env.DEV) {
+    return
+  }
+
+  const enableMocksFlag = import.meta.env.VITE_ENABLE_MOCKS
+  const shouldEnableMocks =
+    enableMocksFlag === undefined ? true : enableMocksFlag === 'true'
+
+  if (!shouldEnableMocks) {
     return
   }
 
@@ -26,7 +34,7 @@ await enableMocks()
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <Suspense fallback={<div>Loading translations...</div>}>
+    <Suspense fallback={<div>{i18n.t('common.loadingTranslations')}</div>}>
       <App />
     </Suspense>
   </React.StrictMode>

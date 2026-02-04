@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BellRing } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,17 @@ import {
 
 const notifications = [
   {
+    id: "call-confirmed",
     title: "Your call has been confirmed.",
     description: "1 hour ago",
   },
   {
+    id: "new-message",
     title: "You have a new message!",
     description: "1 hour ago",
   },
   {
+    id: "subscription-expiring",
     title: "Your subscription is expiring soon!",
     description: "2 hours ago",
   },
@@ -58,8 +61,8 @@ export const Default: Story = {
         <CardDescription>You have 3 unread messages.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        {notifications.map((notification, index) => (
-          <div key={index} className="flex items-center gap-4">
+        {notifications.map((notification) => (
+          <div key={notification.id} className="flex items-center gap-4">
             <BellRing className="size-6" />
             <div>
               <p>{notification.title}</p>

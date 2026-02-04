@@ -1,7 +1,5 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import storybook from "eslint-plugin-storybook";
-import nextPlugin from "@next/eslint-plugin-next";
-
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
@@ -9,7 +7,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tanstackQuery from '@tanstack/eslint-plugin-query'
 
 export default tseslint.config(
-  { ignores: ['.next', 'node_modules', 'coverage', 'reports', 'public', '*.config.{js,ts}'] },
+  { ignores: ['dist', 'node_modules', 'coverage', 'reports', 'public', '*.config.{js,ts,mjs}', '.stryker-tmp', '.storybook', '.scannerwork'] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
@@ -48,11 +46,30 @@ export default tseslint.config(
     },
   },
   {
-    plugins: {
-      '@next/next': nextPlugin,
+    files: ['src/shared/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/app/*',
+                '@/stories/*',
+                '@/mocks/*',
+                '@/test/*',
+                '@/components/ui/*',
+                '@/components/app-*',
+                '@/components/chat-*',
+                '@/components/settings-*',
+              ],
+              message: 'shared code cannot import from app-specific modules',
+            },
+          ],
+        },
+      ],
     },
-    rules: nextPlugin.configs.recommended.rules,
-    settings: nextPlugin.configs.recommended.settings ?? {},
   },
   storybook.configs["flat/recommended"]
 );
