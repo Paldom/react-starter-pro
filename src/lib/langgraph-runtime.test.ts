@@ -21,24 +21,17 @@ vi.mock('@assistant-ui/react-langgraph', () => ({
   useLangGraphRuntime: useLangGraphRuntimeMock,
 }))
 
-import { useAppLangGraphRuntime } from './langgraph-runtime'
+import { useAppRuntime } from './langgraph-runtime'
 
 const originalEnv = {
-  VITE_LANGGRAPH_API_URL: process.env.VITE_LANGGRAPH_API_URL,
-  VITE_LANGGRAPH_ASSISTANT_ID: process.env.VITE_LANGGRAPH_ASSISTANT_ID,
+  VITE_BACKEND_API_URL: process.env.VITE_LANGGRAPH_API_URL,
 }
 
 function resetEnv() {
-  if (originalEnv.VITE_LANGGRAPH_API_URL) {
-    process.env.VITE_LANGGRAPH_API_URL = originalEnv.VITE_LANGGRAPH_API_URL
+  if (originalEnv.VITE_BACKEND_API_URL) {
+    process.env.VITE_BACKEND_API_URL = originalEnv.VITE_BACKEND_API_URL
   } else {
-    delete process.env.VITE_LANGGRAPH_API_URL
-  }
-  if (originalEnv.VITE_LANGGRAPH_ASSISTANT_ID) {
-    process.env.VITE_LANGGRAPH_ASSISTANT_ID =
-      originalEnv.VITE_LANGGRAPH_ASSISTANT_ID
-  } else {
-    delete process.env.VITE_LANGGRAPH_ASSISTANT_ID
+    delete process.env.VITE_BACKEND_API_URL
   }
 }
 
@@ -59,7 +52,7 @@ describe('langgraph runtime', () => {
       .mockReturnValueOnce(0.654321)
       .mockReturnValue(0)
 
-    useAppLangGraphRuntime()
+    useAppRuntime()
     const stream = runtimeRef.current
     expect(stream).toBeTruthy()
 
@@ -68,16 +61,24 @@ describe('langgraph runtime', () => {
       .fn()
       .mockResolvedValue({ remoteId: 'remote', externalId: undefined })
 
-    const events: Array<{ event: string; data: Array<{ id: string; content: string }> }> = []
+    const events: Array<{
+      event: string
+      data: Array<{ id: string; content: string }>
+    }> = []
     const consume = (async () => {
-      const generator = await Promise.resolve(stream!(
-        [],
-        { abortSignal: abortController.signal, initialize } as Parameters<
-          LangGraphStreamCallback<LangChainMessage>
-        >[1]
-      ))
+      const generator = await Promise.resolve(
+        stream!([], {
+          abortSignal: abortController.signal,
+          initialize,
+        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1])
+      )
       for await (const event of generator) {
-        events.push(event as { event: string; data: Array<{ id: string; content: string }> })
+        events.push(
+          event as {
+            event: string
+            data: Array<{ id: string; content: string }>
+          }
+        )
       }
     })()
 
@@ -88,7 +89,9 @@ describe('langgraph runtime', () => {
     expect(events.length).toBeGreaterThan(1)
     expect(events[0].event).toBe('messages/partial')
 
-    const firstPartial = events.find((event) => event.event === 'messages/partial')
+    const firstPartial = events.find(
+      (event) => event.event === 'messages/partial'
+    )
     expect(firstPartial?.data[0].content.length).toBeGreaterThan(0)
 
     const finalEvent = events[events.length - 1]
@@ -108,21 +111,30 @@ describe('langgraph runtime', () => {
       .mockReturnValueOnce(0.123456)
       .mockReturnValue(1)
 
-    useAppLangGraphRuntime()
+    useAppRuntime()
     const stream = runtimeRef.current
     expect(stream).toBeTruthy()
 
-    const events: Array<{ event: string; data: Array<{ id: string; content: string }> }> = []
+    const events: Array<{
+      event: string
+      data: Array<{ id: string; content: string }>
+    }> = []
     const consume = (async () => {
-      const generator = await Promise.resolve(stream!(
-        [],
-        {
+      const generator = await Promise.resolve(
+        stream!([], {
           abortSignal: new AbortController().signal,
-          initialize: vi.fn().mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
-        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1]
-      ))
+          initialize: vi
+            .fn()
+            .mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
+        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1])
+      )
       for await (const event of generator) {
-        events.push(event as { event: string; data: Array<{ id: string; content: string }> })
+        events.push(
+          event as {
+            event: string
+            data: Array<{ id: string; content: string }>
+          }
+        )
       }
     })()
 
@@ -141,7 +153,7 @@ describe('langgraph runtime', () => {
     vi.useFakeTimers()
     vi.spyOn(Math, 'random').mockReturnValue(0)
 
-    useAppLangGraphRuntime()
+    useAppRuntime()
     const stream = runtimeRef.current
     expect(stream).toBeTruthy()
 
@@ -150,13 +162,14 @@ describe('langgraph runtime', () => {
 
     const events: Array<{ event: string }> = []
     const consume = (async () => {
-      const generator = await Promise.resolve(stream!(
-        [],
-        {
+      const generator = await Promise.resolve(
+        stream!([], {
           abortSignal: abortController.signal,
-          initialize: vi.fn().mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
-        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1]
-      ))
+          initialize: vi
+            .fn()
+            .mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
+        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1])
+      )
       for await (const event of generator) {
         events.push(event as { event: string })
       }
@@ -172,7 +185,7 @@ describe('langgraph runtime', () => {
     vi.useFakeTimers()
     vi.spyOn(Math, 'random').mockReturnValue(0)
 
-    useAppLangGraphRuntime()
+    useAppRuntime()
     const stream = runtimeRef.current
     expect(stream).toBeTruthy()
 
@@ -180,13 +193,14 @@ describe('langgraph runtime', () => {
     const events: Array<{ event: string }> = []
 
     const consume = (async () => {
-      const iterator = await Promise.resolve(stream!(
-        [],
-        {
+      const iterator = await Promise.resolve(
+        stream!([], {
           abortSignal: abortController.signal,
-          initialize: vi.fn().mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
-        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1]
-      ))
+          initialize: vi
+            .fn()
+            .mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
+        } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1])
+      )
       for await (const event of iterator) {
         const typedEvent = event as { event: string }
         events.push(typedEvent)
@@ -204,40 +218,65 @@ describe('langgraph runtime', () => {
     )
   })
 
-  it('uses a distinct stream when env is configured', async () => {
-    delete process.env.VITE_LANGGRAPH_API_URL
-    delete process.env.VITE_LANGGRAPH_ASSISTANT_ID
+  it('uses real stream calling the backend when env is configured', async () => {
+    delete process.env.VITE_BACKEND_API_URL
 
-    useAppLangGraphRuntime()
+    useAppRuntime()
     const streamWithoutEnv = runtimeRef.current
 
-    process.env.VITE_LANGGRAPH_API_URL = 'https://example.com'
-    process.env.VITE_LANGGRAPH_ASSISTANT_ID = 'assistant-id'
+    process.env.VITE_LANGGRAPH_API_URL = 'https://example.com/api'
 
-    useAppLangGraphRuntime()
+    const mockResponse = {
+      id: 42,
+      text: 'Hello from the backend!',
+      chat_session_id: 1,
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      })
+    )
+
+    useAppRuntime()
     const streamWithEnv = runtimeRef.current
 
     expect(streamWithoutEnv).toBeTruthy()
     expect(streamWithEnv).toBeTruthy()
     expect(streamWithEnv).not.toBe(streamWithoutEnv)
 
-    vi.useFakeTimers()
-    const events: Array<{ event: string }> = []
-    const consume = (async () => {
-      const generator = await Promise.resolve(streamWithEnv!(
-        [],
+    const events: Array<{
+      event: string
+      data: Array<{ id: string; content: string }>
+    }> = []
+    const generator = await Promise.resolve(
+      streamWithEnv!(
+        [{ type: 'human', content: 'Hello' } as LangChainMessage],
         {
           abortSignal: new AbortController().signal,
-          initialize: vi.fn().mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
+          initialize: vi
+            .fn()
+            .mockResolvedValue({ remoteId: 'remote', externalId: undefined }),
         } as Parameters<LangGraphStreamCallback<LangChainMessage>>[1]
-      ))
-      for await (const event of generator) {
-        events.push(event as { event: string })
-      }
-    })()
+      )
+    )
+    for await (const event of generator) {
+      events.push(
+        event as { event: string; data: Array<{ id: string; content: string }> }
+      )
+    }
 
-    await vi.runAllTimersAsync()
-    await consume
-    expect(events.length).toBeGreaterThan(0)
+    expect(fetch).toHaveBeenCalledWith(
+      'https://example.com/api/chat',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+    )
+    expect(events).toHaveLength(1)
+    expect(events[0].event).toBe('messages/complete')
+    expect(events[0].data[0].content).toBe('Hello from the backend!')
+    expect(events[0].data[0].id).toBe('msg-42')
   })
 })

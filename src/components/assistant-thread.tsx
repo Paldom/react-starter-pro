@@ -5,7 +5,7 @@ import {
   ComposerPrimitive,
   MessagePrimitive,
 } from '@assistant-ui/react'
-import { useAppLangGraphRuntime } from '@/lib/langgraph-runtime'
+import { useAppRuntime } from '@/lib/langgraph-runtime'
 import { cn } from '@/lib/utils'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -74,7 +74,7 @@ function ThreadEmpty() {
 type AssistantProviderProps = Readonly<{ children: ReactNode }>
 
 export function AssistantProvider({ children }: AssistantProviderProps) {
-  const runtime = useAppLangGraphRuntime()
+  const runtime = useAppRuntime()
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>

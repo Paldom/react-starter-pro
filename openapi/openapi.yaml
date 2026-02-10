@@ -1,147 +1,1107 @@
 openapi: 3.0.0
 info:
-  title: Dashboard API
+  title: GenAI Chat Boilerplate API
   version: 1.0.0
-  description: API for dashboard and settings management
+  description: API for GenAI Chat Boilerplate backend
 
 servers:
   - url: /api
     description: Development server
 
 paths:
-  /dashboard/stats:
-    get:
-      summary: Get dashboard statistics
-      operationId: getDashboardStats
+  # ── Chat ───────────────────────────────────────────────────
+  /chat:
+    post:
+      summary: Chat with the bot
+      operationId: chat
       tags:
-        - dashboard
-      responses:
-        '200':
-          description: Dashboard statistics
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DashboardStats'
-              example:
-                totalRevenue: 125000
-                subscriptions: 1234
-                sales: 5678
-                activeUsers: 2345
-
-  /dashboard/chart:
-    get:
-      summary: Get dashboard chart data
-      operationId: getDashboardChart
-      tags:
-        - dashboard
-      responses:
-        '200':
-          description: Dashboard chart data
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ChartDataPoint'
-              example:
-                - name: 'Jan'
-                  value: 4000
-                - name: 'Feb'
-                  value: 3000
-                - name: 'Mar'
-                  value: 5000
-                - name: 'Apr'
-                  value: 4500
-                - name: 'May'
-                  value: 6000
-                - name: 'Jun'
-                  value: 5500
-
-  /settings:
-    get:
-      summary: Get user settings
-      operationId: getUserSettings
-      tags:
-        - settings
-      responses:
-        '200':
-          description: User settings
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSettings'
-              example:
-                name: 'John Doe'
-                email: 'john@example.com'
-                notifications: true
-
-    put:
-      summary: Update user settings
-      operationId: updateUserSettings
-      tags:
-        - settings
+        - chat
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserSettings'
+              $ref: '#/components/schemas/ChatRequest'
             example:
-              name: 'Jane Doe'
-              email: 'jane@example.com'
-              notifications: false
+              message: 'Hello, how can you help me?'
+              chat_session_id: 1
       responses:
         '200':
-          description: Updated user settings
+          description: Chat response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSettings'
+                $ref: '#/components/schemas/ChatResponse'
               example:
-                name: 'Jane Doe'
-                email: 'jane@example.com'
-                notifications: false
+                id: 1
+                text: 'I can help you with many things!'
+                chat_session_id: 1
+                from_gpt: true
+                completion_token_count: 15
+                user_token_count: 8
+                prompt_token_count: 120
+                answer_time: 1200
+                created_at: '2025-01-15T10:30:00Z'
+                feedback: null
+                rating_option_id: null
+                has_database_queries: false
+                database_queries: []
+                files: []
+
+  /chat/stream:
+    post:
+      summary: Stream chat with the bot
+      operationId: streamChat
+      tags:
+        - chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            example:
+              message: 'Hello, how can you help me?'
+              chat_session_id: 1
+      responses:
+        '200':
+          description: Server-Sent Events stream of chat responses
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/StreamingEvent'
+
+  # ── Chat Session ───────────────────────────────────────────
+  /chat_session:
+    post:
+      summary: Create a chat session
+      operationId: createChatSession
+      tags:
+        - chat-session
+      responses:
+        '200':
+          description: Created chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponse'
+              example:
+                id: 1
+                user_id: 42
+                messages: []
+
+    get:
+      summary: Get chat sessions by current user
+      operationId: getChatSessionsByUser
+      tags:
+        - chat-session
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionWithLastMessage'
+              example:
+                - id: 1
+                  title: 'Revenue analysis'
+                  created_at: '2025-01-15T10:30:00Z'
+                - id: 2
+                  title: 'Quarterly report'
+                  created_at: '2025-01-14T08:00:00Z'
+
+  /chat_session/{chat_session_id}:
+    get:
+      summary: Get chat session by ID
+      operationId: getChatSession
+      tags:
+        - chat-session
+      parameters:
+        - name: chat_session_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Chat session with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponse'
+              example:
+                id: 1
+                user_id: 42
+                messages:
+                  - id: 1
+                    text: 'Hello!'
+                    chat_session_id: 1
+                    from_gpt: false
+                    has_database_queries: false
+                    database_queries: []
+                    files: []
+
+  /chat_session/rename:
+    put:
+      summary: Rename chat session
+      operationId: renameChatSession
+      tags:
+        - chat-session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameChatSessionRequest'
+            example:
+              chat_session_id: 1
+              title: 'Updated session title'
+      responses:
+        '200':
+          description: Chat session renamed
+
+  /chat_session/delete:
+    delete:
+      summary: Delete chat session
+      operationId: deleteChatSession
+      tags:
+        - chat-session
+      parameters:
+        - name: chat_session_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Chat session deleted
+
+  /chat_session/search_rating_overview:
+    post:
+      summary: Search rating overview
+      operationId: searchRatingOverview
+      tags:
+        - chat-session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagingSortingAndFiltering'
+      responses:
+        '200':
+          description: Paged rating overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingRatingOverviewResponse'
+
+  /chat_session/excel-export:
+    get:
+      summary: Export chat sessions as Excel
+      operationId: exportChatSessionsExcel
+      tags:
+        - chat-session
+      responses:
+        '200':
+          description: Excel file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  # ── Message ────────────────────────────────────────────────
+  /message:
+    get:
+      summary: Get all messages
+      operationId: getAllMessages
+      tags:
+        - message
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatResponse'
+
+  # ── Rating ─────────────────────────────────────────────────
+  /rating:
+    get:
+      summary: Get rating by chat session ID
+      operationId: getRatingByChatSessionId
+      tags:
+        - rating
+      parameters:
+        - name: chat_session_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rating for the chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingResponse'
+              example:
+                feedback: 'Very helpful!'
+                rating_option:
+                  id: 1
+                  name: 'Great'
+                  score: 5
+
+    put:
+      summary: Send feedback for a chat session
+      operationId: sendFeedback
+      tags:
+        - rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feedback'
+            example:
+              chat_session_id: 1
+              feedback: 'Very helpful!'
+              rating_option_id: 1
+      responses:
+        '200':
+          description: Feedback submitted
+
+  /rating/get_rating_by_message_id:
+    get:
+      summary: Get rating by message ID
+      operationId: getRatingByMessageId
+      tags:
+        - rating
+      parameters:
+        - name: message_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rating for the message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingResponse'
+
+  /rating/send_feedback_by_message_id:
+    put:
+      summary: Send feedback by message ID
+      operationId: sendFeedbackByMessageId
+      tags:
+        - rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseFeedback'
+            example:
+              message_id: 1
+              feedback: 'Great answer!'
+              rating_option_id: 2
+      responses:
+        '200':
+          description: Feedback submitted
+
+  # ── Rating Option ──────────────────────────────────────────
+  /rating_option/rating_option:
+    post:
+      summary: Create a rating option
+      operationId: createRatingOption
+      tags:
+        - rating-option
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingOptionCreate'
+            example:
+              name: 'Great'
+              score: 5
+      responses:
+        '200':
+          description: Created rating option
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingOption'
+              example:
+                id: 1
+                name: 'Great'
+                score: 5
+
+    get:
+      summary: Get all rating options
+      operationId: getRatingOptions
+      tags:
+        - rating-option
+      responses:
+        '200':
+          description: List of rating options
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RatingOption'
+              example:
+                - id: 1
+                  name: 'Great'
+                  score: 5
+                - id: 2
+                  name: 'Good'
+                  score: 4
+                - id: 3
+                  name: 'Poor'
+                  score: 1
+
+  # ── Document ───────────────────────────────────────────────
+  /document/{document_id}:
+    get:
+      summary: Get a document by ID
+      operationId: getDocumentById
+      tags:
+        - document
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+              example:
+                id: 1
+                title: 'Company Policy'
+                active: true
+                url: 'https://storage.example.com/docs/policy.pdf'
+                version: 2
+                created_at: '2025-01-10T09:00:00Z'
+                updated_at: '2025-01-12T14:30:00Z'
+                created_by_user:
+                  id: 1
+                  email: 'admin@example.com'
+                  name: 'Admin User'
+                updated_by_user:
+                  id: 2
+                  email: 'editor@example.com'
+                  name: 'Editor User'
+
+  /document/search-documents:
+    post:
+      summary: Search documents with paging, sorting and filtering
+      operationId: searchDocuments
+      tags:
+        - document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagingSortingAndFiltering'
+      responses:
+        '200':
+          description: Paged document results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingDocumentResponse'
+
+  /document/preview/{document_id}:
+    get:
+      summary: Get the preview URL of a document by ID
+      operationId: getPreviewByDocumentId
+      tags:
+        - document
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Preview URL
+          content:
+            application/json:
+              schema:
+                type: string
+              example: 'https://storage.example.com/preview/doc1.pdf'
+
+  /document/excel-export:
+    get:
+      summary: Export documents as Excel
+      operationId: exportDocumentsExcel
+      tags:
+        - document
+      responses:
+        '200':
+          description: Excel file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  # ── Chunk ──────────────────────────────────────────────────
+  /chunk/search-performance-overview:
+    post:
+      summary: Search performance overview with paging, sorting and filtering
+      operationId: searchPerformanceOverview
+      tags:
+        - chunk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagingSortingAndFiltering'
+      responses:
+        '200':
+          description: Paged performance overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingPerformanceOverviewResponse'
+
+  /chunk/excel-export:
+    get:
+      summary: Export chunks as Excel
+      operationId: exportChunksExcel
+      tags:
+        - chunk
+      responses:
+        '200':
+          description: Excel file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  # ── Auth ───────────────────────────────────────────────────
+  /.auth/me:
+    get:
+      summary: Get authenticated user info
+      operationId: authMe
+      tags:
+        - auth
+      responses:
+        '200':
+          description: Authenticated user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthMeResponse'
+              example:
+                user_roles:
+                  - admin
+                email: 'john@example.com'
+                name: 'John Doe'
+                admin: true
+                permissions:
+                  - read
+                  - write
+                  - admin
+
+  # ── Environment ────────────────────────────────────────────
+  /env/version:
+    get:
+      summary: Get backend version
+      operationId: getVersion
+      tags:
+        - env
+      responses:
+        '200':
+          description: Backend version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+              example:
+                version: '1.2.3'
+
+  # ── Footer ─────────────────────────────────────────────────
+  /footer:
+    get:
+      summary: Get the description of the footer
+      operationId: getFooterDescription
+      tags:
+        - footer
+      responses:
+        '200':
+          description: Footer description text
+          content:
+            application/json:
+              schema:
+                type: string
+              example: 'Powered by GenAI Chat'
 
 components:
   schemas:
-    DashboardStats:
+    # ── Chat ─────────────────────────────────────────────────
+    ChatRequest:
       type: object
       properties:
-        totalRevenue:
-          type: number
-        subscriptions:
-          type: number
-        sales:
-          type: number
-        activeUsers:
-          type: number
+        message:
+          type: string
+        chat_session_id:
+          type: integer
+          nullable: true
       required:
-        - totalRevenue
-        - subscriptions
-        - sales
-        - activeUsers
+        - message
 
-    ChartDataPoint:
+    ChatResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        chat_session_id:
+          type: integer
+        from_gpt:
+          type: boolean
+          nullable: true
+        completion_token_count:
+          type: integer
+          nullable: true
+        user_token_count:
+          type: integer
+          nullable: true
+        prompt_token_count:
+          type: integer
+          nullable: true
+        answer_time:
+          type: integer
+          nullable: true
+          description: Answer time in seconds
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        feedback:
+          type: string
+          nullable: true
+        rating_option_id:
+          type: integer
+          nullable: true
+        has_database_queries:
+          type: boolean
+          default: false
+        database_queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatResponseDatabaseQueriesItem'
+          default: []
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileResponse'
+          default: []
+      required:
+        - id
+        - text
+        - chat_session_id
+
+    ChatResponseDatabaseQueriesItem:
+      type: object
+      properties:
+        query_text:
+          type: string
+        status:
+          type: string
+        result_row_count:
+          type: integer
+          nullable: true
+        execution_time_ms:
+          type: integer
+          nullable: true
+      required:
+        - query_text
+        - status
+
+    FileResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          nullable: true
+        filename:
+          type: string
+        pageNum:
+          type: integer
+          nullable: true
+        content:
+          type: string
+          nullable: true
+      required:
+        - filename
+
+    # ── Streaming ───────────────────────────────────────────
+    StreamingEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - text_chunk
+            - event
+            - complete
+            - title_ready
+            - error
+        content:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+      required:
+        - type
+
+    # ── Chat Session ─────────────────────────────────────────
+    ChatSessionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatResponse'
+          nullable: true
+      required:
+        - id
+        - user_id
+
+    ChatSessionWithLastMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+
+    RenameChatSessionRequest:
+      type: object
+      properties:
+        chat_session_id:
+          type: integer
+        title:
+          type: string
+      required:
+        - chat_session_id
+        - title
+
+    DeleteChatSessionParams:
+      type: object
+      properties:
+        chat_session_id:
+          type: integer
+      required:
+        - chat_session_id
+
+    GetChatSessionsByUserParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          minimum: 1
+        page_size:
+          type: integer
+          default: 10
+          minimum: 1
+        filter:
+          type: string
+          nullable: true
+
+    # ── Rating ───────────────────────────────────────────────
+    RatingResponse:
+      type: object
+      properties:
+        feedback:
+          type: string
+          nullable: true
+        rating_option:
+          $ref: '#/components/schemas/RatingOption'
+          nullable: true
+
+    RatingOption:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        score:
+          type: integer
+      required:
+        - id
+        - name
+        - score
+
+    RatingOptionCreate:
       type: object
       properties:
         name:
           type: string
-        value:
-          type: number
+        score:
+          type: integer
       required:
         - name
-        - value
+        - score
 
-    UserSettings:
+    Feedback:
       type: object
       properties:
-        name:
+        chat_session_id:
+          type: integer
+        feedback:
           type: string
+          nullable: true
+        rating_option_id:
+          type: integer
+          nullable: true
+      required:
+        - chat_session_id
+
+    ResponseFeedback:
+      type: object
+      properties:
+        message_id:
+          type: integer
+        feedback:
+          type: string
+          nullable: true
+        rating_option_id:
+          type: integer
+          nullable: true
+      required:
+        - message_id
+
+    GetRatingByChatSessionIdParams:
+      type: object
+      properties:
+        chat_session_id:
+          type: integer
+      required:
+        - chat_session_id
+
+    GetRatingByMessageIdParams:
+      type: object
+      properties:
+        message_id:
+          type: integer
+      required:
+        - message_id
+
+    # ── Document ─────────────────────────────────────────────
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
         email:
           type: string
-        notifications:
-          type: boolean
+        name:
+          type: string
+          nullable: true
       required:
-        - name
+        - id
         - email
-        - notifications
+
+    DocumentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        active:
+          type: boolean
+        url:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by_user:
+          $ref: '#/components/schemas/UserResponse'
+          nullable: true
+        updated_by_user:
+          $ref: '#/components/schemas/UserResponse'
+          nullable: true
+      required:
+        - id
+        - title
+        - active
+        - created_at
+        - updated_at
+
+    # ── Chunk / Performance ──────────────────────────────────
+    DocumentInPerformance:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+      required:
+        - id
+        - title
+
+    PerformanceOverviewItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        document:
+          $ref: '#/components/schemas/DocumentInPerformance'
+        content:
+          type: string
+          nullable: true
+        page_number:
+          type: integer
+          nullable: true
+        number_of_references:
+          type: integer
+          default: 0
+        average_rating:
+          type: number
+          format: float
+          nullable: true
+          default: 0
+      required:
+        - id
+        - document
+
+    # ── Rating Overview ──────────────────────────────────────
+    RatingOverviewItem:
+      type: object
+      properties:
+        chat_session_id:
+          type: integer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+        feedback:
+          type: string
+          nullable: true
+        rating:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        prompt_token_count:
+          type: integer
+          nullable: true
+        completion_token_count:
+          type: integer
+          nullable: true
+        user_token_count:
+          type: integer
+          nullable: true
+        documents:
+          type: string
+          nullable: true
+      required:
+        - chat_session_id
+        - user
+        - created_at
+
+    # ── Paging, Sorting & Filtering ──────────────────────────
+    PagingSortingAndFiltering:
+      type: object
+      properties:
+        startRow:
+          type: integer
+          default: 0
+        endRow:
+          type: integer
+          default: 10
+        filterModel:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Filter'
+          nullable: true
+        sortModel:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sort'
+          nullable: true
+
+    Sort:
+      type: object
+      properties:
+        colId:
+          type: string
+        sort:
+          type: string
+          enum:
+            - asc
+            - desc
+      required:
+        - colId
+        - sort
+
+    Filter:
+      type: object
+      properties:
+        filterType:
+          type: string
+          enum:
+            - text
+            - number
+            - date
+            - set
+        type:
+          type: string
+          enum:
+            - equals
+            - contains
+            - startsWith
+          description: Match mode (used for text, number, and date filters)
+        filter:
+          description: Filter value
+        dateFrom:
+          type: string
+          format: date-time
+          nullable: true
+          description: Used for date filter
+        dateTo:
+          type: string
+          format: date-time
+          nullable: true
+          description: Used for date filter
+      required:
+        - filterType
+
+    # ── Paged Responses ──────────────────────────────────────
+    PagingRatingOverviewResponse:
+      type: object
+      properties:
+        totalRows:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingOverviewItem'
+      required:
+        - totalRows
+        - data
+
+    PagingDocumentResponse:
+      type: object
+      properties:
+        totalRows:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentResponse'
+      required:
+        - totalRows
+        - data
+
+    PagingPerformanceOverviewResponse:
+      type: object
+      properties:
+        totalRows:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PerformanceOverviewItem'
+      required:
+        - totalRows
+        - data
+
+    # ── Auth ─────────────────────────────────────────────────
+    AuthMeResponse:
+      type: object
+      properties:
+        user_roles:
+          type: array
+          items:
+            type: string
+        email:
+          type: string
+        name:
+          type: string
+          nullable: true
+        admin:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+      required:
+        - user_roles
+        - email
+        - admin
+        - permissions
+
+    # ── Environment ──────────────────────────────────────────
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+          nullable: true
