@@ -15,8 +15,7 @@ export function AppRouteError() {
 
   if (isRouteErrorResponse(error)) {
     message =
-      error.statusText ||
-      t('errors.requestFailed', { status: error.status })
+      error.statusText || t('errors.requestFailed', { status: error.status })
   } else if (error instanceof Error && error.message) {
     message = error.message
   }
@@ -32,7 +31,10 @@ export function AppRouteError() {
 
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button onClick={() => navigate(0)}>{t('errors.tryAgain')}</Button>
-        <Button variant="outline" onClick={() => navigate('/', { replace: true })}>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/', { replace: true })}
+        >
           {t('errors.goHome')}
         </Button>
       </div>

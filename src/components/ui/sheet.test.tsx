@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import {
@@ -31,7 +30,10 @@ describe('ui/sheet', () => {
       )
 
       expect(screen.getByText('Title')).toBeInTheDocument()
-      expect(screen.getByText('Dismiss')).toHaveAttribute('data-slot', 'sheet-close')
+      expect(screen.getByText('Dismiss')).toHaveAttribute(
+        'data-slot',
+        'sheet-close'
+      )
     }
   )
 

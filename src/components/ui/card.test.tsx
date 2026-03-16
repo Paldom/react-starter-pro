@@ -1,7 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './card'
 
 describe('ui/card', () => {
   it('renders card structure with slots', () => {
@@ -14,14 +22,23 @@ describe('ui/card', () => {
         </CardHeader>
         <CardContent>Body</CardContent>
         <CardFooter>Footer</CardFooter>
-      </Card>,
+      </Card>
     )
 
     const cardTitle = screen.getByText('Title')
     expect(cardTitle).toHaveAttribute('data-slot', 'card-title')
-    expect(screen.getByText('Description')).toHaveAttribute('data-slot', 'card-description')
-    expect(screen.getByText('Body')).toHaveAttribute('data-slot', 'card-content')
-    expect(screen.getByText('Footer')).toHaveAttribute('data-slot', 'card-footer')
+    expect(screen.getByText('Description')).toHaveAttribute(
+      'data-slot',
+      'card-description'
+    )
+    expect(screen.getByText('Body')).toHaveAttribute(
+      'data-slot',
+      'card-content'
+    )
+    expect(screen.getByText('Footer')).toHaveAttribute(
+      'data-slot',
+      'card-footer'
+    )
 
     const card = cardTitle.closest('[data-slot="card"]')
     expect(card?.className).toContain('rounded-xl')

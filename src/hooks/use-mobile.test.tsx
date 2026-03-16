@@ -1,4 +1,3 @@
-
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { useIsMobile } from './use-mobile'
@@ -14,12 +13,10 @@ describe('useIsMobile', () => {
     const originalMatchMedia = globalThis.matchMedia
     let changeHandler: ((event: Event) => void) | null = null
     let registeredHandler: EventListener | null = null
-    const addEventListener = vi.fn(
-      (_event: string, cb: EventListener) => {
-        registeredHandler = cb
-        changeHandler = (event: Event) => cb(event)
-      }
-    )
+    const addEventListener = vi.fn((_event: string, cb: EventListener) => {
+      registeredHandler = cb
+      changeHandler = (event: Event) => cb(event)
+    })
     const removeEventListener = vi.fn()
     const matchMediaMock = vi.fn((query: string) => ({
       matches: false,
@@ -36,7 +33,10 @@ describe('useIsMobile', () => {
 
     const { unmount } = render(<Probe />)
     expect(matchMediaMock).toHaveBeenCalledWith('(max-width: 767px)')
-    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    expect(addEventListener).toHaveBeenCalledWith(
+      'change',
+      expect.any(Function)
+    )
 
     await waitFor(() => {
       expect(screen.getByText('mobile')).toBeInTheDocument()
@@ -59,7 +59,10 @@ describe('useIsMobile', () => {
     })
 
     unmount()
-    expect(removeEventListener).toHaveBeenCalledWith('change', registeredHandler)
+    expect(removeEventListener).toHaveBeenCalledWith(
+      'change',
+      registeredHandler
+    )
 
     globalThis.innerWidth = originalWidth
     globalThis.matchMedia = originalMatchMedia

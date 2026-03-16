@@ -18,7 +18,7 @@ instance.interceptors.request.use((config) => {
 
 export const customInstance = <T>(
   url: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<T> => {
   return instance
     .request<T>({

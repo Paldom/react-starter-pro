@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { BellRing } from "lucide-react";
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { BellRing } from 'lucide-react'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -10,45 +10,45 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 
 const notifications = [
   {
-    id: "call-confirmed",
-    title: "Your call has been confirmed.",
-    description: "1 hour ago",
+    id: 'call-confirmed',
+    title: 'Your call has been confirmed.',
+    description: '1 hour ago',
   },
   {
-    id: "new-message",
-    title: "You have a new message!",
-    description: "1 hour ago",
+    id: 'new-message',
+    title: 'You have a new message!',
+    description: '1 hour ago',
   },
   {
-    id: "subscription-expiring",
-    title: "Your subscription is expiring soon!",
-    description: "2 hours ago",
+    id: 'subscription-expiring',
+    title: 'Your subscription is expiring soon!',
+    description: '2 hours ago',
   },
-];
+]
 
 /**
  * Displays a card with header, content, and footer.
  */
 const meta = {
-  title: "ui/Card",
+  title: 'ui/Card',
   component: Card,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   argTypes: {},
   args: {
-    className: "w-96",
+    className: 'w-96',
   },
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
-} satisfies Meta<typeof Card>;
+} satisfies Meta<typeof Card>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof meta>
 
 /**
  * The default form of the card.
@@ -76,7 +76,7 @@ export const Default: Story = {
       </CardFooter>
     </Card>
   ),
-};
+}
 
 /**
  * Use the `CardAction` component to add interactive elements in the header.
@@ -102,7 +102,7 @@ export const WithCardAction: Story = {
       </CardFooter>
     </Card>
   ),
-};
+}
 
 /**
  * A minimal card with only content, no header or footer.
@@ -118,7 +118,7 @@ export const MinimalCard: Story = {
       </CardContent>
     </Card>
   ),
-};
+}
 
 /**
  * A card with only a header section, no content or footer.
@@ -134,4 +134,4 @@ export const HeaderOnly: Story = {
       </CardHeader>
     </Card>
   ),
-};
+}

@@ -3,7 +3,10 @@ import { server } from '@/mocks/server'
 import { getChatStreamMockHandler } from '@/mocks/chat-stream-handler'
 import { http, HttpResponse } from 'msw'
 import { chatModelAdapter } from './chat-model-adapter'
-import type { ChatModelRunOptions, ChatModelRunResult } from '@assistant-ui/react'
+import type {
+  ChatModelRunOptions,
+  ChatModelRunResult,
+} from '@assistant-ui/react'
 
 const encoder = new TextEncoder()
 
@@ -25,7 +28,7 @@ function makeUserMessage(text: string, id = 'msg-1') {
 }
 
 function makeRunOptions(
-  overrides: Partial<ChatModelRunOptions> = {},
+  overrides: Partial<ChatModelRunOptions> = {}
 ): ChatModelRunOptions {
   const msg = makeUserMessage('Hello')
   return {
@@ -44,7 +47,7 @@ function makeRunOptions(
 }
 
 async function consumeGenerator(
-  gen: ReturnType<typeof chatModelAdapter.run>,
+  gen: ReturnType<typeof chatModelAdapter.run>
 ): Promise<ChatModelRunResult[]> {
   const results: ChatModelRunResult[] = []
   if (Symbol.asyncIterator in Object(gen)) {
@@ -66,19 +69,28 @@ describe('chatModelAdapter', () => {
 
   it('yields cumulative text content from text-delta events', async () => {
     server.use(
-      getChatStreamMockHandler(() =>
-        new ReadableStream({
-          start(controller) {
-            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'Hello' }))
-            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: ' world' }))
-            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
-            controller.close()
-          },
-        }),
-      ),
+      getChatStreamMockHandler(
+        () =>
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({ type: 'text-delta', delta: 'Hello' })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'text-delta', delta: ' world' })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'done', finish_reason: 'stop' })
+              )
+              controller.close()
+            },
+          })
+      )
     )
 
-    const results = await consumeGenerator(chatModelAdapter.run(makeRunOptions()))
+    const results = await consumeGenerator(
+      chatModelAdapter.run(makeRunOptions())
+    )
 
     expect(results).toHaveLength(2)
     expect(results[0]).toEqual({
@@ -91,32 +103,34 @@ describe('chatModelAdapter', () => {
 
   it('throws on HTTP error responses', async () => {
     server.use(
-      http.post('*/api/chat/stream', () =>
-        new HttpResponse('Service unavailable', { status: 503 }),
-      ),
+      http.post(
+        '*/api/chat/stream',
+        () => new HttpResponse('Service unavailable', { status: 503 })
+      )
     )
 
     await expect(
-      consumeGenerator(chatModelAdapter.run(makeRunOptions())),
+      consumeGenerator(chatModelAdapter.run(makeRunOptions()))
     ).rejects.toThrow('Chat stream failed (503)')
   })
 
   it('throws on in-stream error events', async () => {
     server.use(
-      getChatStreamMockHandler(() =>
-        new ReadableStream({
-          start(controller) {
-            controller.enqueue(
-              ndjsonLine({ type: 'error', message: 'Rate limit exceeded' }),
-            )
-            controller.close()
-          },
-        }),
-      ),
+      getChatStreamMockHandler(
+        () =>
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({ type: 'error', message: 'Rate limit exceeded' })
+              )
+              controller.close()
+            },
+          })
+      )
     )
 
     await expect(
-      consumeGenerator(chatModelAdapter.run(makeRunOptions())),
+      consumeGenerator(chatModelAdapter.run(makeRunOptions()))
     ).rejects.toThrow('Rate limit exceeded')
   })
 
@@ -130,7 +144,9 @@ describe('chatModelAdapter', () => {
         const stream = new ReadableStream({
           start(controller) {
             controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'ok' }))
-            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
+            controller.enqueue(
+              ndjsonLine({ type: 'done', finish_reason: 'stop' })
+            )
             controller.close()
           },
         })
@@ -138,7 +154,7 @@ describe('chatModelAdapter', () => {
         return new HttpResponse(stream, {
           headers: { 'Content-Type': 'application/x-ndjson' },
         })
-      }),
+      })
     )
 
     globalThis.localStorage.setItem('authToken', 'test-token-123')
@@ -157,7 +173,9 @@ describe('chatModelAdapter', () => {
         const stream = new ReadableStream({
           start(controller) {
             controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'ok' }))
-            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
+            controller.enqueue(
+              ndjsonLine({ type: 'done', finish_reason: 'stop' })
+            )
             controller.close()
           },
         })
@@ -165,7 +183,7 @@ describe('chatModelAdapter', () => {
         return new HttpResponse(stream, {
           headers: { 'Content-Type': 'application/x-ndjson' },
         })
-      }),
+      })
     )
 
     const options = makeRunOptions({

@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import {
@@ -30,14 +29,22 @@ describe('ui/dialog', () => {
       </Dialog>
     )
 
-    expect(screen.getByText('Title')).toHaveAttribute('data-slot', 'dialog-title')
+    expect(screen.getByText('Title')).toHaveAttribute(
+      'data-slot',
+      'dialog-title'
+    )
     expect(screen.getByText('Description')).toHaveAttribute(
       'data-slot',
       'dialog-description'
     )
     expect(screen.getByText('Save')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Close' }).length).toBeGreaterThan(0)
-    expect(screen.getByText('Dismiss')).toHaveAttribute('data-slot', 'dialog-close')
+    expect(
+      screen.getAllByRole('button', { name: 'Close' }).length
+    ).toBeGreaterThan(0)
+    expect(screen.getByText('Dismiss')).toHaveAttribute(
+      'data-slot',
+      'dialog-close'
+    )
   })
 
   it('can hide the close button in dialog content', () => {

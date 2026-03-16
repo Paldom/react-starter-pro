@@ -44,8 +44,13 @@ describe('useUIStore', () => {
     const { createProject, renameProject } = useUIStore.getState()
     const initialCount = useUIStore.getState().projects.length
     const randomUUID =
-      typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
-        ? vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('proj-id' as `${string}-${string}-${string}-${string}-${string}`)
+      typeof globalThis.crypto !== 'undefined' &&
+      'randomUUID' in globalThis.crypto
+        ? vi
+            .spyOn(globalThis.crypto, 'randomUUID')
+            .mockReturnValue(
+              'proj-id' as `${string}-${string}-${string}-${string}-${string}`
+            )
         : null
 
     createProject()
@@ -83,7 +88,9 @@ describe('useUIStore', () => {
 
     deleteProject('client-a')
     const state = useUIStore.getState()
-    expect(state.projects.some((project) => project.id === 'client-a')).toBe(false)
+    expect(state.projects.some((project) => project.id === 'client-a')).toBe(
+      false
+    )
     expect(state.projects.length).toBe(initialCount - 1)
     expect(state.activeProjectId).toBe(state.projects[0]?.id ?? null)
     expect(state.activeChatId).toBe(state.projects[0]?.chats[0]?.id ?? null)
@@ -139,7 +146,9 @@ describe('useUIStore', () => {
 
     useUIStore.setState({ activeChatId: 'c4' })
     createNewChat()
-    const workProject = useUIStore.getState().projects.find((p) => p.id === 'work')
+    const workProject = useUIStore
+      .getState()
+      .projects.find((p) => p.id === 'work')
     expect(workProject?.chats[0]?.title).toBe('New chat')
     expect(useUIStore.getState().activeChatId).toBe(workProject?.chats[0]?.id)
   })
@@ -168,7 +177,11 @@ describe('useUIStore', () => {
 
   it('ignores createNewChat when no projects exist', () => {
     const { createNewChat } = useUIStore.getState()
-    useUIStore.setState({ projects: [], activeProjectId: null, activeChatId: null })
+    useUIStore.setState({
+      projects: [],
+      activeProjectId: null,
+      activeChatId: null,
+    })
 
     createNewChat()
     expect(useUIStore.getState().projects).toEqual([])
@@ -179,11 +192,15 @@ describe('useUIStore', () => {
     const { renameChat, duplicateChat, deleteChat } = useUIStore.getState()
 
     renameChat('c1', 'Updated chat')
-    let defaultProject = useUIStore.getState().projects.find((p) => p.id === 'default')
+    let defaultProject = useUIStore
+      .getState()
+      .projects.find((p) => p.id === 'default')
     expect(defaultProject?.chats[0]?.title).toBe('Updated chat')
 
     duplicateChat('c1')
-    defaultProject = useUIStore.getState().projects.find((p) => p.id === 'default')
+    defaultProject = useUIStore
+      .getState()
+      .projects.find((p) => p.id === 'default')
     const duplicated = defaultProject?.chats.find((chat) =>
       chat.title.endsWith('(copy)')
     )
@@ -192,7 +209,9 @@ describe('useUIStore', () => {
 
     useUIStore.setState({ activeChatId: 'c2' })
     deleteChat('c2')
-    const postDelete = useUIStore.getState().projects.find((p) => p.id === 'default')
+    const postDelete = useUIStore
+      .getState()
+      .projects.find((p) => p.id === 'default')
     const remainingIds = postDelete?.chats.map((chat) => chat.id) ?? []
     expect(remainingIds).not.toContain('c2')
     expect(useUIStore.getState().activeChatId).toBe('c3')
@@ -211,8 +230,13 @@ describe('useUIStore', () => {
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
     const randomMock = vi.spyOn(Math, 'random').mockReturnValue(0)
     const randomUUID =
-      typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
-        ? vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('doc-id' as `${string}-${string}-${string}-${string}-${string}`)
+      typeof globalThis.crypto !== 'undefined' &&
+      'randomUUID' in globalThis.crypto
+        ? vi
+            .spyOn(globalThis.crypto, 'randomUUID')
+            .mockReturnValue(
+              'doc-id' as `${string}-${string}-${string}-${string}-${string}`
+            )
         : null
 
     const { addDocument } = useUIStore.getState()

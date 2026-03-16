@@ -22,9 +22,11 @@ describe('AppRouteError', () => {
     render(<RouterProvider router={router} />)
 
     expect(
-      await screen.findByRole('heading', { name: /something went wrong/i }),
+      await screen.findByRole('heading', { name: /something went wrong/i })
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /try again/i })
+    ).toBeInTheDocument()
 
     consoleError.mockRestore()
   })
@@ -37,7 +39,10 @@ describe('AppRouteError', () => {
         path: '/',
         loader: () => {
           // eslint-disable-next-line @typescript-eslint/only-throw-error -- Response is valid for react-router loaders
-          throw new Response('Boom', { status: 500, statusText: 'Server exploded' })
+          throw new Response('Boom', {
+            status: 500,
+            statusText: 'Server exploded',
+          })
         },
         element: <div />,
         errorElement: <AppRouteError />,

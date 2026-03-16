@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
-
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 
 const meta = {
   title: 'UI/Sheet',
@@ -14,12 +19,12 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => (
     <Sheet defaultOpen>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Sheet Title</SheetTitle>
-                <SheetDescription>Sheet description.</SheetDescription>
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Sheet Title</SheetTitle>
+          <SheetDescription>Sheet description.</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
   ),
 }

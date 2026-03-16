@@ -1,38 +1,38 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from '@/components/ui/accordion'
 
 /**
  * A vertically stacked set of interactive headings that each reveal a section
  * of content.
  */
 const meta = {
-  title: "ui/Accordion",
+  title: 'ui/Accordion',
   component: Accordion,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   argTypes: {
     type: {
-      control: "radio",
-      description: "Type of accordion behavior",
-      options: ["single", "multiple"],
+      control: 'radio',
+      description: 'Type of accordion behavior',
+      options: ['single', 'multiple'],
     },
     collapsible: {
-      control: "boolean",
-      description: "Can an open accordion be collapsed using the trigger",
-      if: { arg: "type", eq: "single" },
+      control: 'boolean',
+      description: 'Can an open accordion be collapsed using the trigger',
+      if: { arg: 'type', eq: 'single' },
     },
     disabled: {
-      control: "boolean",
+      control: 'boolean',
     },
   },
   args: {
-    type: "single",
+    type: 'single',
     collapsible: true,
     disabled: false,
   },
@@ -59,63 +59,65 @@ const meta = {
       </AccordionItem>
     </Accordion>
   ),
-} satisfies Meta<typeof Accordion>;
+} satisfies Meta<typeof Accordion>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof meta>
 
 /**
  * The default behavior of the accordion allows only one item to be open.
  */
-export const Default: Story = {};
+export const Default: Story = {}
 
 export const ShouldOnlyOpenOneWhenSingleType: Story = {
-  name: "when accordions are clicked, should open only one item at a time",
+  name: 'when accordions are clicked, should open only one item at a time',
   args: {
-    type: "single" as const,
+    type: 'single' as const,
   },
-  tags: ["!dev", "!autodocs"],
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const accordions = canvas.getAllByRole("button");
+    const canvas = within(canvasElement)
+    const accordions = canvas.getAllByRole('button')
 
     // Open the tabs one at a time
     for (const trigger of accordions) {
-      await userEvent.click(trigger);
-      await waitFor(() => expect(canvas.getAllByRole("region")).toHaveLength(1));
+      await userEvent.click(trigger)
+      await waitFor(() => expect(canvas.getAllByRole('region')).toHaveLength(1))
     }
 
     // Close the last opened tab
-    await userEvent.click(accordions[accordions.length - 1]);
-    await waitFor(() => expect(canvas.queryByRole("region")).toBeNull());
+    await userEvent.click(accordions[accordions.length - 1])
+    await waitFor(() => expect(canvas.queryByRole('region')).toBeNull())
   },
-};
+}
 
 export const ShouldOpenAllWhenMultipleType: Story = {
-  name: "when accordions are clicked, should open all items one at a time",
+  name: 'when accordions are clicked, should open all items one at a time',
   args: {
-    type: "multiple",
+    type: 'multiple',
   },
-  tags: ["!dev", "!autodocs"],
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const accordions = canvas.getAllByRole("button");
+    const canvas = within(canvasElement)
+    const accordions = canvas.getAllByRole('button')
 
     // Open all tabs one at a time
     for (let i = 0; i < accordions.length; i++) {
-      await userEvent.click(accordions[i]);
-      await waitFor(() => expect(canvas.getAllByRole("region")).toHaveLength(i + 1));
+      await userEvent.click(accordions[i])
+      await waitFor(() =>
+        expect(canvas.getAllByRole('region')).toHaveLength(i + 1)
+      )
     }
 
     // Close all tabs one at a time
     for (let i = accordions.length - 1; i > 0; i--) {
-      await userEvent.click(accordions[i]);
-      await waitFor(() => expect(canvas.getAllByRole("region")).toHaveLength(i));
+      await userEvent.click(accordions[i])
+      await waitFor(() => expect(canvas.getAllByRole('region')).toHaveLength(i))
     }
 
     // Close the last opened tab
-    await userEvent.click(accordions[0]);
-    await waitFor(() => expect(canvas.queryByRole("region")).toBeNull());
+    await userEvent.click(accordions[0])
+    await waitFor(() => expect(canvas.queryByRole('region')).toBeNull())
   },
-};
+}

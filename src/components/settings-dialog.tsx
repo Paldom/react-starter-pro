@@ -3,11 +3,7 @@ import { Settings, User, Bell } from 'lucide-react'
 import { useTranslation } from '@/i18n/client'
 import { useUIStore } from '@/shared/store/ui'
 import { cn } from '@/lib/utils'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -45,7 +41,10 @@ function GeneralSection() {
             {t('settings.general.themeDescription')}
           </p>
         </div>
-        <Select value={theme} onValueChange={(v) => setTheme(v as 'light' | 'dark')}>
+        <Select
+          value={theme}
+          onValueChange={(v) => setTheme(v as 'light' | 'dark')}
+        >
           <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
@@ -110,7 +109,9 @@ function NotificationsSection() {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium">{t('settings.notifications.title')}</h3>
+      <h3 className="text-lg font-medium">
+        {t('settings.notifications.title')}
+      </h3>
       <Separator />
 
       <div className="flex items-center justify-between">
@@ -135,7 +136,8 @@ function NotificationsSection() {
 export function SettingsDialog() {
   const { t } = useTranslation()
   const { settingsDialogOpen, setSettingsDialogOpen } = useUIStore()
-  const [activeSection, setActiveSection] = React.useState<SettingsSection>('general')
+  const [activeSection, setActiveSection] =
+    React.useState<SettingsSection>('general')
 
   // Reset to general when dialog opens
   React.useEffect(() => {

@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import {
@@ -46,8 +45,14 @@ describe('ui/dropdown-menu', () => {
       </DropdownMenu>
     )
 
-    expect(screen.getByText('Actions')).toHaveAttribute('data-slot', 'dropdown-menu-label')
-    expect(screen.getByText('New')).toHaveAttribute('data-slot', 'dropdown-menu-item')
+    expect(screen.getByText('Actions')).toHaveAttribute(
+      'data-slot',
+      'dropdown-menu-label'
+    )
+    expect(screen.getByText('New')).toHaveAttribute(
+      'data-slot',
+      'dropdown-menu-item'
+    )
     expect(screen.getByText('Checked')).toHaveAttribute(
       'data-slot',
       'dropdown-menu-checkbox-item'

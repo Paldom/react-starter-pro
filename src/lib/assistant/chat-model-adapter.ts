@@ -1,7 +1,4 @@
-import type {
-  ChatModelAdapter,
-  ChatModelRunOptions,
-} from '@assistant-ui/react'
+import type { ChatModelAdapter, ChatModelRunOptions } from '@assistant-ui/react'
 import type { TextMessagePart } from '@assistant-ui/react'
 import type {
   ChatStreamEvent,
@@ -18,7 +15,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
  * V1: extract text content only. Images/files/tool-calls are dropped.
  */
 function serializeMessages(
-  messages: ChatModelRunOptions['messages'],
+  messages: ChatModelRunOptions['messages']
 ): ChatStreamMessage[] {
   return messages.map((msg) => ({
     role: msg.role,
@@ -55,14 +52,11 @@ export const chatModelAdapter: ChatModelAdapter = {
 
     // Accumulate state across events
     let textContent = ''
-    const toolCalls = new Map<
-      string,
-      { toolName: string; argsText: string }
-    >()
+    const toolCalls = new Map<string, { toolName: string; argsText: string }>()
 
     for await (const event of parseNDJSON<ChatStreamEvent>(
       res.body,
-      abortSignal,
+      abortSignal
     )) {
       switch (event.type) {
         case 'text-delta':

@@ -62,7 +62,15 @@ export const resources = {
       settings: {
         title: '',
         nav: { general: '', profile: '', notifications: '' },
-        general: { title: '', theme: '', themeDescription: '', light: '', dark: '', language: '', languageDescription: '' },
+        general: {
+          title: '',
+          theme: '',
+          themeDescription: '',
+          light: '',
+          dark: '',
+          language: '',
+          languageDescription: '',
+        },
         profile: { title: '', name: '', email: '' },
         notifications: { title: '', enable: '', enableDescription: '' },
       },

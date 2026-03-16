@@ -4,7 +4,10 @@ import { type Locale, defaultLocale } from './config'
 
 type Namespace = Parameters<typeof useTranslationOrg>[0]
 
-export function useTranslation(lng: Locale = defaultLocale, ns: Namespace = 'common') {
+export function useTranslation(
+  lng: Locale = defaultLocale,
+  ns: Namespace = 'common'
+) {
   const ret = useTranslationOrg(ns)
   const { i18n } = ret
   const [activeLng, setActiveLng] = useState(i18n.resolvedLanguage)

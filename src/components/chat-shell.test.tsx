@@ -1,4 +1,3 @@
-
 import { MemoryRouter } from 'react-router-dom'
 import { render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -22,7 +21,9 @@ describe('ChatShell', () => {
     ).toBeInTheDocument()
     const breadcrumb = screen.getByLabelText('breadcrumb')
     expect(within(breadcrumb).getByText('Work')).toBeInTheDocument()
-    expect(within(breadcrumb).getByText('Q1 metrics summary')).toBeInTheDocument()
+    expect(
+      within(breadcrumb).getByText('Q1 metrics summary')
+    ).toBeInTheDocument()
   })
 
   it('renders the document sidebar and resize handle when open', () => {

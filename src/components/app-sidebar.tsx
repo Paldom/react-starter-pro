@@ -59,7 +59,6 @@ function getInitials(name: string) {
     .join('')
 }
 
-
 export function AppSidebar() {
   const { t } = useTranslation()
   const {
@@ -74,7 +73,9 @@ export function AppSidebar() {
     deleteProject,
   } = useUIStore()
 
-  const [editingProjectId, setEditingProjectId] = React.useState<string | null>(null)
+  const [editingProjectId, setEditingProjectId] = React.useState<string | null>(
+    null
+  )
   const [editingName, setEditingName] = React.useState('')
 
   const handleStartEdit = (projectId: string, currentName: string) => {
@@ -103,10 +104,16 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link to="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <img src="/logo.svg" alt={t('app.logoAlt')} className="size-4 invert" />
+                  <img
+                    src="/logo.svg"
+                    alt={t('app.logoAlt')}
+                    className="size-4 invert"
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{t('app.name')}</span>
+                  <span className="truncate font-semibold">
+                    {t('app.name')}
+                  </span>
                   <span className="truncate text-xs">{t('app.edition')}</span>
                 </div>
               </Link>
@@ -195,7 +202,9 @@ export function AppSidebar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
                           <DropdownMenuItem
-                            onClick={() => handleStartEdit(project.id, project.name)}
+                            onClick={() =>
+                              handleStartEdit(project.id, project.name)
+                            }
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             {t('project.editName')}

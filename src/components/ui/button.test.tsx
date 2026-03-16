@@ -23,7 +23,7 @@ describe('ui/button', () => {
     render(
       <Button asChild>
         <a href="/docs">Docs</a>
-      </Button>,
+      </Button>
     )
 
     const link = screen.getByRole('link', { name: /docs/i })
@@ -31,7 +31,11 @@ describe('ui/button', () => {
   })
 
   it('merges custom class names through buttonVariants', () => {
-    const className = buttonVariants({ variant: 'secondary', size: 'lg', className: 'extra-class' })
+    const className = buttonVariants({
+      variant: 'secondary',
+      size: 'lg',
+      className: 'extra-class',
+    })
     expect(className).toContain('extra-class')
     expect(className).toContain('bg-secondary')
     expect(className).toContain('h-10')
@@ -41,7 +45,7 @@ describe('ui/button', () => {
     render(
       <Button variant="secondary" size="lg" className="custom-class">
         Styled
-      </Button>,
+      </Button>
     )
 
     const button = screen.getByRole('button', { name: /styled/i })

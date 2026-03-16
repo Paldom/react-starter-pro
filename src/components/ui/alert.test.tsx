@@ -9,7 +9,7 @@ describe('ui/alert', () => {
       <Alert>
         <AlertTitle>Heads up</AlertTitle>
         <AlertDescription>Something happened</AlertDescription>
-      </Alert>,
+      </Alert>
     )
 
     expect(screen.getByRole('alert')).toBeInTheDocument()

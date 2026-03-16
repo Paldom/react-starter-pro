@@ -27,35 +27,26 @@ async function collect<T>(gen: AsyncGenerator<T>): Promise<T[]> {
 
 describe('parseNDJSON', () => {
   it('parses multiple complete lines in a single chunk', async () => {
-    const stream = makeStream([
-      '{"type":"a"}\n{"type":"b"}\n',
-    ])
+    const stream = makeStream(['{"type":"a"}\n{"type":"b"}\n'])
     const results = await collect(parseNDJSON(stream))
     expect(results).toEqual([{ type: 'a' }, { type: 'b' }])
   })
 
   it('handles lines split across chunks', async () => {
-    const stream = makeStream([
-      '{"type":"he',
-      'llo"}\n{"type":"world"}\n',
-    ])
+    const stream = makeStream(['{"type":"he', 'llo"}\n{"type":"world"}\n'])
     const results = await collect(parseNDJSON(stream))
     expect(results).toEqual([{ type: 'hello' }, { type: 'world' }])
   })
 
   it('skips blank lines', async () => {
-    const stream = makeStream([
-      '{"type":"a"}\n\n\n{"type":"b"}\n',
-    ])
+    const stream = makeStream(['{"type":"a"}\n\n\n{"type":"b"}\n'])
     const results = await collect(parseNDJSON(stream))
     expect(results).toEqual([{ type: 'a' }, { type: 'b' }])
   })
 
   it('logs and skips malformed lines', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const stream = makeStream([
-      '{"type":"a"}\nnot-json\n{"type":"b"}\n',
-    ])
+    const stream = makeStream(['{"type":"a"}\nnot-json\n{"type":"b"}\n'])
     const results = await collect(parseNDJSON(stream))
     expect(results).toEqual([{ type: 'a' }, { type: 'b' }])
     expect(warn).toHaveBeenCalledWith('[ndjson] malformed line:', 'not-json')

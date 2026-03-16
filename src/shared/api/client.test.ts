@@ -7,7 +7,9 @@ interface AxiosConfig {
 
 const { requestMock, interceptorRef, createMock } = vi.hoisted(() => ({
   requestMock: vi.fn(),
-  interceptorRef: { current: undefined as ((config: AxiosConfig) => AxiosConfig) | undefined },
+  interceptorRef: {
+    current: undefined as ((config: AxiosConfig) => AxiosConfig) | undefined,
+  },
   createMock: vi.fn(),
 }))
 

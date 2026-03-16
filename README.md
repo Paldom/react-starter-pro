@@ -4,7 +4,7 @@ A production-ready React starter that ships with a complete assistant/chat UI sa
 
 ## Features
 
-- Assistant UI thread with streaming responses (mock LangGraph runtime by default)
+- Assistant UI thread with streaming responses (custom NDJSON adapter over LocalRuntime)
 - Command palette search (`Cmd/Ctrl+K`) and settings (`Cmd/Ctrl+,`)
 - Document upload sidebar with drag-and-drop
 - Type-safe API client generation (OpenAPI + Orval)
@@ -44,13 +44,17 @@ src/
 │   └── ui/                        # shadcn/ui primitives
 │
 ├── hooks/                        # shadcn-provided hooks (e.g. use-mobile)
-├── lib/                          # Local utilities + mock runtime
-│   ├── langgraph-runtime.ts       # Mock streaming runtime
+├── lib/                          # Local utilities + assistant adapter
+│   ├── assistant/                 # Chat streaming adapter
+│   │   ├── chat-model-adapter.ts  # ChatModelAdapter (async generator → NDJSON)
+│   │   ├── ndjson-parser.ts       # ReadableStream → parsed JSON async generator
+│   │   ├── get-auth-headers.ts    # Auth header helper for native fetch
+│   │   └── use-chat-runtime.ts    # useLocalRuntime hook
 │   ├── chat-data.ts               # Sample project/chat data
 │   └── utils.ts
 │
 ├── shared/                       # Cross-cutting reusable code
-│   ├── api/                      # Axios client + Orval-generated hooks
+│   ├── api/                      # Axios client + Orval-generated hooks + models
 │   └── store/                    # Zustand UI state
 │
 ├── i18n/                         # i18n config + client helpers
@@ -71,7 +75,7 @@ public/
         └── common.json
 
 components.json                   # shadcn/ui configuration
-openapi/openapi.yaml              # OpenAPI spec
+openapi/openapi.yaml              # OpenAPI spec (dashboard, settings, chat stream schemas)
 orval.config.ts                   # Orval client generation
 .storybook/                       # Storybook config
 ```
@@ -116,7 +120,8 @@ npm run test:mutation
 npm run typecheck
 npm run lint
 npm run lint:fix
-npm run format
+npm run format            # Format all files (respects .prettierignore)
+npm run format:check      # Check formatting without writing (used in CI)
 
 # API generation
 npm run api:gen
@@ -170,13 +175,9 @@ Create a `.env` file in the root directory:
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api
 VITE_ENABLE_MOCKS=true
-
-# LangGraph configuration (optional - mock mode used when not set)
-VITE_LANGGRAPH_API_URL=
-VITE_LANGGRAPH_ASSISTANT_ID=
 ```
 
-If the LangGraph variables are not set, the app uses the mock streaming runtime.
+When `VITE_ENABLE_MOCKS=true` (default in dev), MSW intercepts all API calls including the chat stream endpoint. Set `VITE_API_BASE_URL` to point at a real backend to use live streaming.
 
 ## Code Quality Standards
 
@@ -188,7 +189,17 @@ If the LangGraph variables are not set, the app uses the mock streaming runtime.
 
 ## CI
 
-GitHub Actions runs on Node 24 and executes `typecheck`, `lint`, `test:coverage`, `build`, then `test:mutation`.
+GitHub Actions runs on Node 24 and executes the following checks in order:
+
+1. **Format check** — `prettier --check .` ensures all files are formatted
+2. **API freshness** — regenerates API client and verifies no diff in `src/shared/api/generated/`
+3. **Type check** — `tsc --noEmit`
+4. **Lint** — `eslint .`
+5. **Test with coverage** — 80% threshold enforced
+6. **Build** — production build must succeed
+7. **Mutation testing** — Stryker runs in a separate job after the above pass
+
+If you update `openapi/openapi.yaml`, run `npm run api:gen` and commit the regenerated files. CI will fail if the generated code is stale.
 
 ## Contributing
 
@@ -196,17 +207,16 @@ GitHub Actions runs on Node 24 and executes `typecheck`, `lint`, `test:coverage`
 2. Maintain 80% test coverage
 3. Ensure all tests pass including mutation tests
 4. Run `npm run lint:fix` and `npm run format` before committing
-5. Write meaningful commit messages
-6. Ensure no accessibility issues
+5. If you update `openapi/openapi.yaml`, run `npm run api:gen` and commit the result
+6. Write meaningful commit messages
+7. Ensure no accessibility issues
 
 ## Tech Stack
 
 - **React 19.2.4** - UI library
 - **TypeScript 5.9.3** - Type safety
 - **Vite 7.3.1** - Build tool
-- **@assistant-ui/react 0.12.3** - Assistant UI primitives
-- **@assistant-ui/react-langgraph 0.12.2** - LangGraph runtime adapter
-- **@langchain/langgraph-sdk 1.5.5** - LangGraph SDK
+- **@assistant-ui/react 0.12.3** - Assistant UI primitives (LocalRuntime + custom NDJSON adapter)
 - **TanStack Query 5.90.20** - Server state
 - **Zustand 5.0.11** - Client state
 - **React Router 7.13.0** - Routing

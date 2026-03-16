@@ -5,7 +5,7 @@
  */
 export async function* parseNDJSON<T>(
   stream: ReadableStream<Uint8Array>,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): AsyncGenerator<T, void, undefined> {
   const reader = stream.getReader()
   const decoder = new TextDecoder()

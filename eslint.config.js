@@ -1,5 +1,5 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
+import storybook from 'eslint-plugin-storybook'
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
@@ -7,7 +7,20 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tanstackQuery from '@tanstack/eslint-plugin-query'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', 'reports', 'public', '*.config.{js,ts,mjs}', '.stryker-tmp', '.storybook', '.scannerwork', 'src/shared/api/generated/chat'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'coverage',
+      'reports',
+      'public',
+      '*.config.{js,ts,mjs}',
+      '.stryker-tmp',
+      '.storybook',
+      '.scannerwork',
+      'src/shared/api/generated/chat',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
@@ -71,5 +84,5 @@ export default tseslint.config(
       ],
     },
   },
-  storybook.configs["flat/recommended"]
-);
+  storybook.configs['flat/recommended']
+)

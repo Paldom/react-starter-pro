@@ -18,6 +18,14 @@ jobs:
 
       - run: npm ci
 
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Check API freshness
+        run: |
+          npm run api:gen
+          git diff --exit-code src/shared/api/generated/
+
       - run: npm run typecheck
 
       - run: npm run lint

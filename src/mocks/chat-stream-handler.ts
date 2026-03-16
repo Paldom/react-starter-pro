@@ -12,7 +12,7 @@ function ndjsonLine(data: Record<string, unknown>): Uint8Array {
  * Tests can override via server.use(getChatStreamMockHandler(customFn)).
  */
 export function getChatStreamMockHandler(
-  overrideFn?: (body: unknown) => ReadableStream<Uint8Array>,
+  overrideFn?: (body: unknown) => ReadableStream<Uint8Array>
 ) {
   return http.post('*/api/chat/stream', async ({ request }) => {
     const body: unknown = await request.json()
@@ -26,7 +26,7 @@ export function getChatStreamMockHandler(
             controller.enqueue(ndjsonLine({ type: 'text-delta', delta: w }))
           }
           controller.enqueue(
-            ndjsonLine({ type: 'done', finish_reason: 'stop' }),
+            ndjsonLine({ type: 'done', finish_reason: 'stop' })
           )
           controller.close()
         },

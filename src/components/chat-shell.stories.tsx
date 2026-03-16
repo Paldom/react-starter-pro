@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ChatShell } from '@/components/chat-shell'
 
-
 const meta = {
   title: 'App/ChatShell',
   component: ChatShell,
@@ -12,7 +11,5 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  render: () => (
-    <ChatShell />
-  ),
+  render: () => <ChatShell />,
 }

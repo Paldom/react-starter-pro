@@ -1,4 +1,3 @@
-
 import { MemoryRouter } from 'react-router-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -50,8 +49,7 @@ describe('AppHeader', () => {
 
     const updatedChat = useUIStore
       .getState()
-      .projects[0]
-      .chats.find((chat) => chat.id === 'c4')
+      .projects[0].chats.find((chat) => chat.id === 'c4')
     expect(updatedChat?.title).toBe('Updated title')
   })
 

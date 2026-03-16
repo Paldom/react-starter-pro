@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import {
@@ -23,12 +22,16 @@ describe('ui/avatar', () => {
       </AvatarGroup>
     )
 
-    const avatar = screen
-      .getByText('AB')
-      .closest('[data-slot="avatar"]')
+    const avatar = screen.getByText('AB').closest('[data-slot="avatar"]')
     expect(avatar).toHaveAttribute('data-size', 'sm')
-    expect(screen.getByText('AB')).toHaveAttribute('data-slot', 'avatar-fallback')
+    expect(screen.getByText('AB')).toHaveAttribute(
+      'data-slot',
+      'avatar-fallback'
+    )
     expect(screen.getByText('!')).toHaveAttribute('data-slot', 'avatar-badge')
-    expect(screen.getByText('+2')).toHaveAttribute('data-slot', 'avatar-group-count')
+    expect(screen.getByText('+2')).toHaveAttribute(
+      'data-slot',
+      'avatar-group-count'
+    )
   })
 })

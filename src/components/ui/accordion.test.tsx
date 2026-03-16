@@ -19,7 +19,7 @@ describe('ui/accordion', () => {
           <AccordionTrigger>Section</AccordionTrigger>
           <AccordionContent>Hidden content</AccordionContent>
         </AccordionItem>
-      </Accordion>,
+      </Accordion>
     )
 
     const trigger = screen.getByRole('button', { name: /section/i })

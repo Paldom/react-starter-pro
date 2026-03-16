@@ -1,6 +1,17 @@
-import { CheckCircle2, Clock, AlertCircle, Trash2, X, FileText } from 'lucide-react'
+import {
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Trash2,
+  X,
+  FileText,
+} from 'lucide-react'
 import { useTranslation } from '@/i18n/client'
-import { useUIStore, type Document, type DocumentStatus } from '@/shared/store/ui'
+import {
+  useUIStore,
+  type Document,
+  type DocumentStatus,
+} from '@/shared/store/ui'
 import { Button } from '@/components/ui/button'
 import { Dropzone } from '@/components/ui/dropzone'
 import { cn } from '@/lib/utils'
@@ -70,8 +81,12 @@ function DocumentItem({
 
 export function DocumentSidebar() {
   const { t } = useTranslation()
-  const { documents, documentSidebarOpen, setDocumentSidebarOpen, addDocument } =
-    useUIStore()
+  const {
+    documents,
+    documentSidebarOpen,
+    setDocumentSidebarOpen,
+    addDocument,
+  } = useUIStore()
   const formatSize = (bytes: number) => formatFileSize(bytes, t)
 
   const handleFilesAdded = (files: File[]) => {
@@ -114,7 +129,12 @@ export function DocumentSidebar() {
           </div>
         )}
 
-        <div className={cn('flex min-h-0 flex-1 flex-col', documents.length > 0 && 'mt-4')}>
+        <div
+          className={cn(
+            'flex min-h-0 flex-1 flex-col',
+            documents.length > 0 && 'mt-4'
+          )}
+        >
           <h3 className="mb-2 shrink-0 text-sm font-medium text-muted-foreground">
             {t('document.uploadNew')}
           </h3>

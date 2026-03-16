@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import {
@@ -30,7 +29,10 @@ describe('ui/select', () => {
       </Select>
     )
 
-    expect(screen.getByText('Group')).toHaveAttribute('data-slot', 'select-label')
+    expect(screen.getByText('Group')).toHaveAttribute(
+      'data-slot',
+      'select-label'
+    )
     const optionA = screen
       .getAllByText('Option A')
       .find((node) => node.closest('[data-slot="select-item"]'))

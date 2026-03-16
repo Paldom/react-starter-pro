@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -51,7 +50,9 @@ describe('ui/sidebar', () => {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Tooltip">Inbox</SidebarMenuButton>
+                    <SidebarMenuButton tooltip="Tooltip">
+                      Inbox
+                    </SidebarMenuButton>
                     <SidebarMenuAction showOnHover>Action</SidebarMenuAction>
                     <SidebarMenuBadge>3</SidebarMenuBadge>
                   </SidebarMenuItem>

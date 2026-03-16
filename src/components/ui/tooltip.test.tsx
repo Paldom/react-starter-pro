@@ -11,7 +11,9 @@ describe('ui/tooltip', () => {
       </Tooltip>
     )
 
-    const tooltipContent = document.querySelector('[data-slot="tooltip-content"]')
+    const tooltipContent = document.querySelector(
+      '[data-slot="tooltip-content"]'
+    )
     expect(tooltipContent).toBeTruthy()
     expect(tooltipContent).toHaveTextContent('Tooltip text')
   })

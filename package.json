@@ -13,7 +13,8 @@
     "test:mutation": "stryker run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,json,css}\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "api:gen": "orval",
     "sonar:version": "mise exec -- sonar-scanner -v",
@@ -102,5 +103,12 @@
     "workerDirectory": [
       "public"
     ]
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "**/*.{json,css,md,mdx,yml,yaml,html}": "prettier --write"
   }
 }
