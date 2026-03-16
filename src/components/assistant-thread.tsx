@@ -1,11 +1,8 @@
-import { type ReactNode } from 'react'
 import {
-  AssistantRuntimeProvider,
   ThreadPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
 } from '@assistant-ui/react'
-import { useAppLangGraphRuntime } from '@/lib/langgraph-runtime'
 import { cn } from '@/lib/utils'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -70,20 +67,6 @@ function ThreadEmpty() {
   )
 }
 
-// Provider component - should be placed high in the tree to persist state
-type AssistantProviderProps = Readonly<{ children: ReactNode }>
-
-export function AssistantProvider({ children }: AssistantProviderProps) {
-  const runtime = useAppLangGraphRuntime()
-
-  return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      {children}
-    </AssistantRuntimeProvider>
-  )
-}
-
-// Thread UI component - can be mounted/unmounted without losing state
 type AssistantThreadProps = Readonly<{ className?: string }>
 
 export function AssistantThread({ className }: AssistantThreadProps) {

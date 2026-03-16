@@ -1,0 +1,193 @@
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { server } from '@/mocks/server'
+import { getChatStreamMockHandler } from '@/mocks/chat-stream-handler'
+import { http, HttpResponse } from 'msw'
+import { chatModelAdapter } from './chat-model-adapter'
+import type { ChatModelRunOptions, ChatModelRunResult } from '@assistant-ui/react'
+
+const encoder = new TextEncoder()
+
+function ndjsonLine(data: Record<string, unknown>): Uint8Array {
+  return encoder.encode(JSON.stringify(data) + '\n')
+}
+
+const baseMetadata = { custom: {} }
+
+function makeUserMessage(text: string, id = 'msg-1') {
+  return {
+    id,
+    role: 'user' as const,
+    createdAt: new Date(),
+    content: [{ type: 'text' as const, text }],
+    attachments: [],
+    metadata: baseMetadata,
+  }
+}
+
+function makeRunOptions(
+  overrides: Partial<ChatModelRunOptions> = {},
+): ChatModelRunOptions {
+  const msg = makeUserMessage('Hello')
+  return {
+    messages: [msg],
+    abortSignal: new AbortController().signal,
+    runConfig: {},
+    context: {
+      useModelConfig: () => ({}),
+    },
+    config: {
+      useModelConfig: () => ({}),
+    },
+    unstable_getMessage: () => msg,
+    ...overrides,
+  } as ChatModelRunOptions
+}
+
+async function consumeGenerator(
+  gen: ReturnType<typeof chatModelAdapter.run>,
+): Promise<ChatModelRunResult[]> {
+  const results: ChatModelRunResult[] = []
+  if (Symbol.asyncIterator in Object(gen)) {
+    for await (const result of gen as AsyncGenerator<ChatModelRunResult>) {
+      results.push(result)
+    }
+  }
+  return results
+}
+
+describe('chatModelAdapter', () => {
+  beforeEach(() => {
+    server.use(getChatStreamMockHandler())
+  })
+
+  afterEach(() => {
+    globalThis.localStorage.removeItem('authToken')
+  })
+
+  it('yields cumulative text content from text-delta events', async () => {
+    server.use(
+      getChatStreamMockHandler(() =>
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'Hello' }))
+            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: ' world' }))
+            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
+            controller.close()
+          },
+        }),
+      ),
+    )
+
+    const results = await consumeGenerator(chatModelAdapter.run(makeRunOptions()))
+
+    expect(results).toHaveLength(2)
+    expect(results[0]).toEqual({
+      content: [{ type: 'text', text: 'Hello' }],
+    })
+    expect(results[1]).toEqual({
+      content: [{ type: 'text', text: 'Hello world' }],
+    })
+  })
+
+  it('throws on HTTP error responses', async () => {
+    server.use(
+      http.post('*/api/chat/stream', () =>
+        new HttpResponse('Service unavailable', { status: 503 }),
+      ),
+    )
+
+    await expect(
+      consumeGenerator(chatModelAdapter.run(makeRunOptions())),
+    ).rejects.toThrow('Chat stream failed (503)')
+  })
+
+  it('throws on in-stream error events', async () => {
+    server.use(
+      getChatStreamMockHandler(() =>
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              ndjsonLine({ type: 'error', message: 'Rate limit exceeded' }),
+            )
+            controller.close()
+          },
+        }),
+      ),
+    )
+
+    await expect(
+      consumeGenerator(chatModelAdapter.run(makeRunOptions())),
+    ).rejects.toThrow('Rate limit exceeded')
+  })
+
+  it('includes Authorization header when authToken is set', async () => {
+    let capturedHeaders: Headers | undefined
+
+    server.use(
+      http.post('*/api/chat/stream', ({ request }) => {
+        capturedHeaders = request.headers
+
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'ok' }))
+            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
+            controller.close()
+          },
+        })
+
+        return new HttpResponse(stream, {
+          headers: { 'Content-Type': 'application/x-ndjson' },
+        })
+      }),
+    )
+
+    globalThis.localStorage.setItem('authToken', 'test-token-123')
+    await consumeGenerator(chatModelAdapter.run(makeRunOptions()))
+
+    expect(capturedHeaders?.get('Authorization')).toBe('Bearer test-token-123')
+  })
+
+  it('serializes only text parts from messages', async () => {
+    let capturedBody: Record<string, unknown> | undefined
+
+    server.use(
+      http.post('*/api/chat/stream', async ({ request }) => {
+        capturedBody = (await request.json()) as Record<string, unknown>
+
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(ndjsonLine({ type: 'text-delta', delta: 'ok' }))
+            controller.enqueue(ndjsonLine({ type: 'done', finish_reason: 'stop' }))
+            controller.close()
+          },
+        })
+
+        return new HttpResponse(stream, {
+          headers: { 'Content-Type': 'application/x-ndjson' },
+        })
+      }),
+    )
+
+    const options = makeRunOptions({
+      messages: [
+        {
+          id: 'msg-1',
+          role: 'user' as const,
+          createdAt: new Date(),
+          content: [
+            { type: 'text' as const, text: 'part one' },
+            { type: 'text' as const, text: ' part two' },
+          ],
+          attachments: [],
+          metadata: baseMetadata,
+        },
+      ],
+    })
+
+    await consumeGenerator(chatModelAdapter.run(options))
+
+    expect(capturedBody?.messages).toEqual([
+      { role: 'user', content: 'part one part two' },
+    ])
+  })
+})

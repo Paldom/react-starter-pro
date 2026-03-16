@@ -54,6 +54,10 @@ if (!HTMLElement.prototype.scrollIntoView) {
   HTMLElement.prototype.scrollIntoView = noop
 }
 
+if (!Element.prototype.scrollTo) {
+  Element.prototype.scrollTo = noop as unknown as typeof Element.prototype.scrollTo
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())

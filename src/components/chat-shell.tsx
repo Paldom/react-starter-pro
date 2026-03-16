@@ -1,3 +1,4 @@
+import { AssistantRuntimeProvider } from '@assistant-ui/react'
 import { useUIStore } from '@/shared/store/ui'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import {
@@ -10,13 +11,15 @@ import { AppSidebar } from './app-sidebar'
 import { ChatSearchDialog } from './chat-search-dialog'
 import { SettingsDialog } from './settings-dialog'
 import { DocumentSidebar } from './document-sidebar'
-import { AssistantProvider, AssistantThread } from './assistant-thread'
+import { AssistantThread } from './assistant-thread'
+import { useChatRuntime } from '@/lib/assistant/use-chat-runtime'
 
 export function ChatShell() {
   const { documentSidebarOpen } = useUIStore()
+  const runtime = useChatRuntime()
 
   return (
-    <AssistantProvider>
+    <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider defaultOpen>
         <AppSidebar />
         <SidebarInset className="flex flex-col overflow-hidden">
@@ -24,7 +27,7 @@ export function ChatShell() {
           <ResizablePanelGroup orientation="horizontal" className="flex-1">
             <ResizablePanel
               defaultSize="70%"
-              minSize={documentSidebarOpen ? "30%" : "100%"}
+              minSize={documentSidebarOpen ? '30%' : '100%'}
               className="min-w-0"
             >
               <AssistantThread className="h-full" />
@@ -42,6 +45,6 @@ export function ChatShell() {
         <ChatSearchDialog />
         <SettingsDialog />
       </SidebarProvider>
-    </AssistantProvider>
+    </AssistantRuntimeProvider>
   )
 }

@@ -4,6 +4,7 @@ import {
   getUpdateUserSettingsMockHandler,
 } from '@/shared/api/generated/settings/settings.msw'
 import type { UserSettings } from '@/shared/api/generated/models'
+import { getChatStreamMockHandler } from './chat-stream-handler'
 
 export const handlers = [
   ...getDashboardMock(),
@@ -12,4 +13,5 @@ export const handlers = [
     const body = (await info.request.json()) as UserSettings
     return body
   }),
+  getChatStreamMockHandler(),
 ]
