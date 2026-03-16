@@ -29,7 +29,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-import { useLanguageEffect } from './useLanguageEffect'
+import { useLanguageEffect } from './use-language-effect'
 
 function TestComponent() {
   useLanguageEffect()

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
-import { App } from './App'
+import { App } from './app'
 import { resetUIStore } from '@/test/utils'
 
 describe('App', () => {

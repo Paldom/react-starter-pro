@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { App } from '@/app/App'
+import { App } from '@/app/app'
 import i18n from './i18n'
 import './index.css'
 import type { SetupWorker } from 'msw/browser'

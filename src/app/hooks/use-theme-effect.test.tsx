@@ -1,7 +1,7 @@
 
 import { act, render } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useThemeEffect } from './useThemeEffect'
+import { useThemeEffect } from './use-theme-effect'
 import { resetUIStore } from '@/test/utils'
 import { useUIStore } from '@/shared/store/ui'
 
