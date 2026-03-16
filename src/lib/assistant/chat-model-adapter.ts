@@ -7,7 +7,7 @@ import type {
   ChatStreamEvent,
   ChatStreamRequest,
   ChatStreamMessage,
-} from './types'
+} from '@/shared/api/generated/models'
 import { parseNDJSON } from './ndjson-parser'
 import { getAuthHeaders } from './get-auth-headers'
 

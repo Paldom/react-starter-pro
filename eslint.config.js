@@ -7,7 +7,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tanstackQuery from '@tanstack/eslint-plugin-query'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', 'reports', 'public', '*.config.{js,ts,mjs}', '.stryker-tmp', '.storybook', '.scannerwork'] },
+  { ignores: ['dist', 'node_modules', 'coverage', 'reports', 'public', '*.config.{js,ts,mjs}', '.stryker-tmp', '.storybook', '.scannerwork', 'src/shared/api/generated/chat'] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {

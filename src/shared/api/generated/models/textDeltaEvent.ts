@@ -5,8 +5,9 @@
  * API for dashboard, settings, and chat streaming
  * OpenAPI spec version: 1.0.0
  */
+import type { TextDeltaEventType } from './textDeltaEventType';
 
-export interface ChartDataPoint {
-  name: string;
-  value: number;
+export interface TextDeltaEvent {
+  type: TextDeltaEventType;
+  delta: string;
 }

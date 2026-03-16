@@ -23,5 +23,5 @@
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/shared/api/generated/chat"]
 }

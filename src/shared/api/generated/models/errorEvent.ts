@@ -5,8 +5,10 @@
  * API for dashboard, settings, and chat streaming
  * OpenAPI spec version: 1.0.0
  */
+import type { ErrorEventType } from './errorEventType';
 
-export interface ChartDataPoint {
-  name: string;
-  value: number;
+export interface ErrorEvent {
+  type: ErrorEventType;
+  message: string;
+  code?: string;
 }

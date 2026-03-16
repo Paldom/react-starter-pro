@@ -88,12 +88,17 @@ describe('shared/api/client', () => {
   })
 
   it('delegates to the axios instance and returns response data', async () => {
-    const response = await customInstance<{ ok: boolean }>({
-      url: '/test',
-      method: 'get',
+    const response = await customInstance<{ ok: boolean }>('/test', {
+      method: 'GET',
     })
 
-    expect(requestMock).toHaveBeenCalledWith({ url: '/test', method: 'get' })
+    expect(requestMock).toHaveBeenCalledWith({
+      url: '/test',
+      method: 'GET',
+      data: undefined,
+      headers: undefined,
+      signal: undefined,
+    })
     expect(response).toEqual({ ok: true })
   })
 })

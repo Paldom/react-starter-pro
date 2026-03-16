@@ -6,7 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ChartDataPoint {
-  name: string;
-  value: number;
-}
+export type ChatStreamRequestRunConfig = { [key: string]: unknown };

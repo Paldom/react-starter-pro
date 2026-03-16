@@ -5,8 +5,9 @@
  * API for dashboard, settings, and chat streaming
  * OpenAPI spec version: 1.0.0
  */
+import type { ChatStreamMessageRole } from './chatStreamMessageRole';
 
-export interface ChartDataPoint {
-  name: string;
-  value: number;
+export interface ChatStreamMessage {
+  role: ChatStreamMessageRole;
+  content: string;
 }

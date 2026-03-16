@@ -16,6 +16,17 @@ instance.interceptors.request.use((config) => {
   return config
 })
 
-export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  return instance.request<T>(config).then(({ data }) => data)
+export const customInstance = <T>(
+  url: string,
+  options?: RequestInit,
+): Promise<T> => {
+  return instance
+    .request<T>({
+      url,
+      method: options?.method as AxiosRequestConfig['method'],
+      data: options?.body,
+      headers: options?.headers as AxiosRequestConfig['headers'],
+      signal: options?.signal as AxiosRequestConfig['signal'],
+    })
+    .then(({ data }) => data)
 }
