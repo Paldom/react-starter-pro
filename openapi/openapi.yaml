@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Application API
   version: 1.0.0
-  description: API for dashboard, settings, and chat streaming
+  description: API for assistant workspace, dashboard, settings, and chat streaming
 
 servers:
   - url: /api
@@ -84,6 +84,428 @@ paths:
             application/x-ndjson:
               schema:
                 $ref: '#/components/schemas/ChatStreamEvent'
+
+  /projects:
+    get:
+      summary: List projects
+      operationId: listProjects
+      tags:
+        - projects
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated list of projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjects'
+              example:
+                items:
+                  - id: 'work'
+                    name: 'Work'
+                    createdAt: '2024-01-15T10:00:00Z'
+                    chatCount: 2
+                  - id: 'client-a'
+                    name: 'Client A'
+                    createdAt: '2024-02-01T09:00:00Z'
+                    chatCount: 2
+                nextCursor: null
+                hasMore: false
+    post:
+      summary: Create a project
+      operationId: createProject
+      tags:
+        - projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+            example:
+              name: 'New Project'
+      responses:
+        '201':
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+              example:
+                id: 'proj-abc123'
+                name: 'New Project'
+                createdAt: '2024-06-01T12:00:00Z'
+                chatCount: 0
+
+  /projects/{projectId}:
+    patch:
+      summary: Update a project
+      operationId: updateProject
+      tags:
+        - projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+            example:
+              name: 'Renamed Project'
+      responses:
+        '200':
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+              example:
+                id: 'work'
+                name: 'Renamed Project'
+                createdAt: '2024-01-15T10:00:00Z'
+                chatCount: 2
+    delete:
+      summary: Delete a project
+      operationId: deleteProject
+      tags:
+        - projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Project deleted
+
+  /projects/{projectId}/chats:
+    get:
+      summary: List chats in a project
+      operationId: listProjectChats
+      tags:
+        - chats
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated list of chats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChats'
+              example:
+                items:
+                  - id: 'c4'
+                    title: 'Q1 metrics summary'
+                    projectId: 'work'
+                    createdAt: '2024-01-15T10:00:00Z'
+                    updatedAt: '2024-01-15T10:00:00Z'
+                nextCursor: null
+                hasMore: false
+    post:
+      summary: Create a chat in a project
+      operationId: createProjectChat
+      tags:
+        - chats
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+            example:
+              title: 'New chat'
+      responses:
+        '201':
+          description: Created chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+              example:
+                id: 'chat-abc123'
+                title: 'New chat'
+                projectId: 'work'
+                createdAt: '2024-06-01T12:00:00Z'
+                updatedAt: '2024-06-01T12:00:00Z'
+
+  /chats/{chatId}:
+    patch:
+      summary: Update a chat
+      operationId: updateChat
+      tags:
+        - chats
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChatRequest'
+            example:
+              title: 'Renamed chat'
+      responses:
+        '200':
+          description: Updated chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+              example:
+                id: 'c4'
+                title: 'Renamed chat'
+                projectId: 'work'
+                createdAt: '2024-01-15T10:00:00Z'
+                updatedAt: '2024-06-01T12:00:00Z'
+    delete:
+      summary: Delete a chat
+      operationId: deleteChat
+      tags:
+        - chats
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Chat deleted
+
+  /chats/search:
+    get:
+      summary: Search chats across all projects
+      operationId: searchChats
+      tags:
+        - chats
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated search results with project context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChatSearchResults'
+              example:
+                items:
+                  - id: 'c4'
+                    title: 'Q1 metrics summary'
+                    projectId: 'work'
+                    projectName: 'Work'
+                    createdAt: '2024-01-15T10:00:00Z'
+                    updatedAt: '2024-01-15T10:00:00Z'
+                nextCursor: null
+                hasMore: false
+
+  /chats/recent:
+    get:
+      summary: Get recently updated chats
+      operationId: getRecentChats
+      tags:
+        - chats
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Recent chats with project context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChatSearchResults'
+              example:
+                items:
+                  - id: 'c4'
+                    title: 'Q1 metrics summary'
+                    projectId: 'work'
+                    projectName: 'Work'
+                    createdAt: '2024-01-15T10:00:00Z'
+                    updatedAt: '2024-06-01T12:00:00Z'
+                nextCursor: null
+                hasMore: false
+
+  /documents:
+    get:
+      summary: List documents
+      operationId: listDocuments
+      tags:
+        - documents
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/DocumentStatus'
+        - name: projectId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDocuments'
+              example:
+                items:
+                  - id: 'doc-1'
+                    name: 'Q1 Financial Report.pdf'
+                    size: 2457600
+                    type: 'application/pdf'
+                    status: 'ingested'
+                    projectId: null
+                    addedAt: '2024-01-15T10:00:00Z'
+                nextCursor: null
+                hasMore: false
+    post:
+      summary: Upload a document
+      operationId: uploadDocument
+      tags:
+        - documents
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                projectId:
+                  type: string
+              required:
+                - file
+      responses:
+        '201':
+          description: Created document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              example:
+                id: 'doc-new'
+                name: 'notes.txt'
+                size: 1024
+                type: 'text/plain'
+                status: 'pending'
+                projectId: null
+                addedAt: '2024-06-01T12:00:00Z'
+
+  /documents/{documentId}:
+    delete:
+      summary: Delete a document
+      operationId: deleteDocument
+      tags:
+        - documents
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Document deleted
+
+  /documents/{documentId}/status:
+    get:
+      summary: Get document processing status
+      operationId: getDocumentStatus
+      tags:
+        - documents
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentStatusResponse'
+              example:
+                id: 'doc-1'
+                status: 'ingested'
 
   /settings:
     get:
@@ -297,3 +719,209 @@ components:
           tool-call-delta: '#/components/schemas/ToolCallDeltaEvent'
           done: '#/components/schemas/DoneEvent'
           error: '#/components/schemas/ErrorEvent'
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        chatCount:
+          type: integer
+      required:
+        - id
+        - name
+        - createdAt
+        - chatCount
+
+    CreateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    CreateChatRequest:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    UpdateChatRequest:
+      type: object
+      properties:
+        title:
+          type: string
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+
+    PaginatedProjects:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required:
+        - items
+        - nextCursor
+        - hasMore
+
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        projectId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - projectId
+        - createdAt
+        - updatedAt
+
+    ChatSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        projectId:
+          type: string
+        projectName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - projectId
+        - projectName
+        - createdAt
+        - updatedAt
+
+    PaginatedChats:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chat'
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required:
+        - items
+        - nextCursor
+        - hasMore
+
+    PaginatedChatSearchResults:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatSearchResult'
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required:
+        - items
+        - nextCursor
+        - hasMore
+
+    DocumentStatus:
+      type: string
+      enum:
+        - pending
+        - ingested
+        - error
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/DocumentStatus'
+        projectId:
+          type: string
+          nullable: true
+        addedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - size
+        - type
+        - status
+        - addedAt
+
+    DocumentStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/DocumentStatus'
+      required:
+        - id
+        - status
+
+    PaginatedDocuments:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required:
+        - items
+        - nextCursor
+        - hasMore

@@ -16,17 +16,29 @@ instance.interceptors.request.use((config) => {
   return config
 })
 
+/**
+ * Custom Orval mutator.
+ * Orval-generated response types wrap in { data, status, headers }.
+ * We match that shape so TypeScript types align with runtime values.
+ */
 export const customInstance = <T>(
   url: string,
   options?: RequestInit
 ): Promise<T> => {
   return instance
-    .request<T>({
+    .request({
       url,
       method: options?.method as AxiosRequestConfig['method'],
       data: options?.body,
       headers: options?.headers as AxiosRequestConfig['headers'],
       signal: options?.signal as AxiosRequestConfig['signal'],
     })
-    .then(({ data }) => data)
+    .then(
+      (response) =>
+        ({
+          data: response.data as unknown,
+          status: response.status,
+          headers: response.headers,
+        }) as T
+    )
 }

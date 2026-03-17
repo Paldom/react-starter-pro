@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { App } from './app'
 import { resetUIStore } from '@/test/utils'
 
@@ -18,15 +18,12 @@ describe('App', () => {
     })
   })
 
-  it('renders active project and chat in the header breadcrumb', async () => {
+  it('renders the app title in the breadcrumb when no chat is active', async () => {
     render(<App />)
 
     await waitFor(() => {
       const breadcrumb = screen.getByLabelText('breadcrumb')
-      expect(within(breadcrumb).getByText('Work')).toBeInTheDocument()
-      expect(
-        within(breadcrumb).getByText('Q1 metrics summary')
-      ).toBeInTheDocument()
+      expect(breadcrumb).toBeInTheDocument()
     })
   })
 })

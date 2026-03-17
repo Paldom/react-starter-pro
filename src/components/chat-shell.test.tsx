@@ -1,38 +1,37 @@
 import { MemoryRouter } from 'react-router-dom'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ChatShell } from './chat-shell'
-import { resetUIStore } from '@/test/utils'
+import { resetUIStore, TestQueryWrapper } from '@/test/utils'
 
 describe('ChatShell', () => {
   beforeEach(() => {
     resetUIStore()
   })
 
-  it('renders the assistant thread and active breadcrumb', () => {
+  it('renders the assistant thread', () => {
     render(
-      <MemoryRouter>
-        <ChatShell />
-      </MemoryRouter>
+      <TestQueryWrapper>
+        <MemoryRouter>
+          <ChatShell />
+        </MemoryRouter>
+      </TestQueryWrapper>
     )
 
     expect(
       screen.getByText('Start a conversation by typing a message below.')
     ).toBeInTheDocument()
-    const breadcrumb = screen.getByLabelText('breadcrumb')
-    expect(within(breadcrumb).getByText('Work')).toBeInTheDocument()
-    expect(
-      within(breadcrumb).getByText('Q1 metrics summary')
-    ).toBeInTheDocument()
   })
 
-  it('renders the document sidebar and resize handle when open', () => {
+  it('renders the document sidebar when open', () => {
     resetUIStore({ documentSidebarOpen: true })
 
     const { container } = render(
-      <MemoryRouter>
-        <ChatShell />
-      </MemoryRouter>
+      <TestQueryWrapper>
+        <MemoryRouter>
+          <ChatShell />
+        </MemoryRouter>
+      </TestQueryWrapper>
     )
 
     expect(screen.getByText('Documents')).toBeInTheDocument()

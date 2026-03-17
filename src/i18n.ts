@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
 
-void i18n
+export const i18nInit = i18n
   .use(HttpBackend) // load /locales/{{lng}}/{{ns}}.json over HTTP
   .use(LanguageDetector) // detect user language
   .use(initReactI18next) // bind i18next to React
@@ -42,6 +42,7 @@ export const resources = {
         searchChats: '',
         searchPlaceholder: '',
         noResults: '',
+        recentChats: '',
         share: '',
         rename: '',
         duplicate: '',
@@ -71,7 +72,17 @@ export const resources = {
           language: '',
           languageDescription: '',
         },
-        profile: { title: '', name: '', email: '' },
+        profile: {
+          title: '',
+          name: '',
+          email: '',
+          save: '',
+          cancel: '',
+          nameRequired: '',
+          emailInvalid: '',
+          saveError: '',
+          saveSuccess: '',
+        },
         notifications: { title: '', enable: '', enableDescription: '' },
       },
       document: {
@@ -94,6 +105,7 @@ export const resources = {
         close: '',
         loadingApplication: '',
         loadingTranslations: '',
+        loadMore: '',
         openMenu: '',
         more: '',
         units: {

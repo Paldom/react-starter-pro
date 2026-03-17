@@ -1,5 +1,8 @@
-import type { ChatModelAdapter, ChatModelRunOptions } from '@assistant-ui/react'
-import type { TextMessagePart } from '@assistant-ui/react'
+import type {
+  ChatModelAdapter,
+  ChatModelRunOptions,
+  TextMessagePart,
+} from '@assistant-ui/react'
 import type {
   ChatStreamEvent,
   ChatStreamRequest,

@@ -10,6 +10,7 @@
     "searchChats": "Beszelgetesek keresese",
     "searchPlaceholder": "Kereses a beszelgetesek kozott...",
     "noResults": "Nem talalhato beszelgetes.",
+    "recentChats": "Legutobbi beszelgetesek",
     "share": "Megosztas",
     "rename": "Atnevezes",
     "duplicate": "Masolas",
@@ -46,7 +47,13 @@
     "profile": {
       "title": "Profil",
       "name": "Nev",
-      "email": "E-mail"
+      "email": "E-mail",
+      "save": "Mentes",
+      "cancel": "Megse",
+      "nameRequired": "A nev megadasa kotelezo",
+      "emailInvalid": "Kerjuk, adjon meg ervenyes e-mail cimet",
+      "saveError": "Nem sikerult menteni a beallitasokat. Probalkozzon ujra.",
+      "saveSuccess": "Beallitasok sikeresen mentve."
     },
     "notifications": {
       "title": "Ertesitesek",
@@ -74,6 +81,7 @@
     "close": "Bezaras",
     "loadingApplication": "Alkalmazas betoltese...",
     "loadingTranslations": "Forditasok betoltese...",
+    "loadMore": "Tobb betoltese",
     "openMenu": "Menu megnyitasa",
     "more": "Tobb",
     "units": {

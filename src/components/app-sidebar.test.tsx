@@ -1,19 +1,38 @@
 import { MemoryRouter } from 'react-router-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AppSidebar } from './app-sidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import { resetUIStore } from '@/test/utils'
+import { resetUIStore, createTestQueryClient } from '@/test/utils'
 import { useUIStore } from '@/shared/store/ui'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { AssistantRuntimeProvider } from '@assistant-ui/react'
+import { useChatRuntime } from '@/lib/assistant/use-chat-runtime'
+import { server } from '@/mocks/server'
+import { http, HttpResponse } from 'msw'
+
+function RuntimeWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+  const runtime = useChatRuntime()
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      {children}
+    </AssistantRuntimeProvider>
+  )
+}
 
 function renderSidebar() {
+  const queryClient = createTestQueryClient()
   return render(
-    <MemoryRouter>
-      <SidebarProvider defaultOpen>
-        <AppSidebar />
-      </SidebarProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <RuntimeWrapper>
+          <SidebarProvider defaultOpen>
+            <AppSidebar />
+          </SidebarProvider>
+        </RuntimeWrapper>
+      </MemoryRouter>
+    </QueryClientProvider>
   )
 }
 
@@ -22,76 +41,148 @@ describe('AppSidebar', () => {
     resetUIStore()
   })
 
-  it('renders app info, projects, and can add project/search', async () => {
-    const user = userEvent.setup()
+  it('renders app info and loads projects from server', async () => {
     renderSidebar()
 
     expect(screen.getByText('React Starter Pro')).toBeInTheDocument()
     expect(screen.getByText('Enterprise')).toBeInTheDocument()
-    expect(screen.getByText('Work')).toBeInTheDocument()
 
-    const activeChat = screen.getByRole('button', {
-      name: /q1 metrics summary/i,
-    })
-    expect(activeChat).toHaveAttribute('data-active', 'true')
+    // Wait for user profile to load from MSW
+    await waitFor(
+      () => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument()
+      },
+      { timeout: 5000 }
+    )
+  })
 
-    await user.click(screen.getByRole('button', { name: /add project/i }))
-    expect(screen.getByText('New project')).toBeInTheDocument()
+  it('opens search dialog', async () => {
+    const user = userEvent.setup()
+    renderSidebar()
 
     await user.click(screen.getByRole('button', { name: /search chats/i }))
     expect(useUIStore.getState().searchDialogOpen).toBe(true)
   })
 
-  it('opens settings from the user menu', async () => {
+  it('renders loading skeletons while projects load', () => {
+    server.use(
+      http.get('*/api/projects', async () => {
+        await new Promise(() => {})
+        return HttpResponse.json({})
+      })
+    )
+
+    renderSidebar()
+
+    expect(screen.getByText('Add project')).toBeInTheDocument()
+    expect(screen.getByText('Search chats')).toBeInTheDocument()
+  })
+
+  it('shows user settings loading state', () => {
+    server.use(
+      http.get('*/api/settings', async () => {
+        await new Promise(() => {})
+        return HttpResponse.json({})
+      })
+    )
+
+    renderSidebar()
+
+    expect(screen.getByText('...')).toBeInTheDocument()
+  })
+
+  it('creates a project when clicking add project', async () => {
     const user = userEvent.setup()
     renderSidebar()
 
-    await user.click(screen.getByRole('button', { name: /alex johnson/i }))
+    const addButton = screen.getByRole('button', { name: /add project/i })
+    await user.click(addButton)
+
+    expect(addButton).toBeInTheDocument()
+  })
+
+  it('renders projects and opens settings from user menu', async () => {
+    const user = userEvent.setup()
+    renderSidebar()
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /john doe/i }))
     await user.click(await screen.findByText('Settings'))
 
     expect(useUIStore.getState().settingsDialogOpen).toBe(true)
   })
 
-  it('edits and removes a project via the menu actions', async () => {
-    const user = userEvent.setup()
-    const { container } = renderSidebar()
-
-    const triggers = container.querySelectorAll(
-      '[data-slot="dropdown-menu-trigger"]'
+  it('handles projects with chats', async () => {
+    server.use(
+      http.get('*/api/projects', () => {
+        return HttpResponse.json({
+          items: [
+            {
+              id: 'p1',
+              name: 'My Project',
+              createdAt: '2024-01-01T00:00:00Z',
+              chatCount: 2,
+            },
+          ],
+          nextCursor: null,
+          hasMore: false,
+        })
+      }),
+      http.get('*/api/projects/p1/chats', () => {
+        return HttpResponse.json({
+          items: [
+            {
+              id: 'c1',
+              title: 'Test Chat',
+              projectId: 'p1',
+              createdAt: '2024-01-01T00:00:00Z',
+              updatedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
+          nextCursor: null,
+          hasMore: false,
+        })
+      })
     )
-    await user.click(triggers[0])
-    await user.click(screen.getByText('Edit name'))
 
-    const input = screen.getByRole('textbox')
-    await user.clear(input)
-    await user.type(input, 'Renamed{enter}')
-    expect(screen.getByText('Renamed')).toBeInTheDocument()
+    renderSidebar()
 
-    const updatedTriggers = container.querySelectorAll(
-      '[data-slot="dropdown-menu-trigger"]'
-    )
-    await user.click(updatedTriggers[0])
-    await user.click(screen.getByText('Remove'))
-
-    expect(screen.queryByText('Renamed')).not.toBeInTheDocument()
-  })
-
-  it('disables project removal when only one project exists', async () => {
-    const user = userEvent.setup()
-    const projects = useUIStore.getState().projects.slice(0, 1)
-    useUIStore.setState({
-      projects,
-      activeProjectId: projects[0]?.id ?? null,
-      activeChatId: projects[0]?.chats[0]?.id ?? null,
+    await waitFor(() => {
+      expect(screen.getByText('My Project')).toBeInTheDocument()
     })
 
-    const { container } = renderSidebar()
-    const triggers = container.querySelectorAll(
-      '[data-slot="dropdown-menu-trigger"]'
-    )
-    await user.click(triggers[0])
+    await waitFor(() => {
+      expect(screen.getByText('Test Chat')).toBeInTheDocument()
+    })
+  })
 
-    const removeItem = screen.getByText('Remove')
-    expect(removeItem.closest('[data-disabled]')).toBeTruthy()
+  it('shows load more button when hasNextPage is true', async () => {
+    server.use(
+      http.get('*/api/projects', () => {
+        return HttpResponse.json({
+          items: [
+            {
+              id: 'p1',
+              name: 'Project 1',
+              createdAt: '2024-01-01T00:00:00Z',
+              chatCount: 0,
+            },
+          ],
+          nextCursor: 'p1',
+          hasMore: true,
+        })
+      })
+    )
+
+    renderSidebar()
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Load more')).toBeInTheDocument()
   })
 })

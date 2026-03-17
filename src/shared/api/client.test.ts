@@ -89,8 +89,18 @@ describe('shared/api/client', () => {
     expect(config.headers.Authorization).toBeUndefined()
   })
 
-  it('delegates to the axios instance and returns response data', async () => {
-    const response = await customInstance<{ ok: boolean }>('/test', {
+  it('delegates to the axios instance and returns wrapped response', async () => {
+    requestMock.mockResolvedValue({
+      data: { ok: true },
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    })
+
+    const response = await customInstance<{
+      data: { ok: boolean }
+      status: number
+      headers: Record<string, string>
+    }>('/test', {
       method: 'GET',
     })
 
@@ -101,6 +111,7 @@ describe('shared/api/client', () => {
       headers: undefined,
       signal: undefined,
     })
-    expect(response).toEqual({ ok: true })
+    expect(response.data).toEqual({ ok: true })
+    expect(response.status).toBe(200)
   })
 })

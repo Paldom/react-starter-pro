@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -16,6 +18,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import {
+  useGetUserSettings,
+  useUpdateUserSettings,
+  getGetUserSettingsQueryKey,
+} from '@/shared/api/generated/settings/settings'
+import { useQueryClient } from '@tanstack/react-query'
 
 type SettingsSection = 'general' | 'profile' | 'notifications'
 
@@ -71,8 +79,89 @@ function GeneralSection() {
 
 function ProfileSection() {
   const { t } = useTranslation()
-  const [name, setName] = React.useState('Alex Johnson')
-  const [email, setEmail] = React.useState('alex@example.com')
+  const queryClient = useQueryClient()
+  const { data: settingsData, isLoading } = useGetUserSettings()
+
+  const serverValues = React.useMemo(
+    () => ({
+      name: settingsData?.data.name ?? '',
+      email: settingsData?.data.email ?? '',
+    }),
+    [settingsData]
+  )
+
+  const [formValues, setFormValues] = React.useState(serverValues)
+  const [errors, setErrors] = React.useState<{
+    name?: string
+    email?: string
+  }>({})
+  const [showSuccess, setShowSuccess] = React.useState(false)
+
+  // Re-sync form when server data changes
+  React.useEffect(() => {
+    setFormValues(serverValues)
+  }, [serverValues])
+
+  const isDirty =
+    formValues.name !== serverValues.name ||
+    formValues.email !== serverValues.email
+
+  const validate = (): boolean => {
+    const newErrors: typeof errors = {}
+    if (!formValues.name.trim()) {
+      newErrors.name = t('settings.profile.nameRequired')
+    }
+    if (
+      !formValues.email.trim() ||
+      !formValues.email.includes('@') ||
+      !formValues.email.split('@')[1]?.includes('.')
+    ) {
+      newErrors.email = t('settings.profile.emailInvalid')
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const updateMutation = useUpdateUserSettings({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: getGetUserSettingsQueryKey(),
+        })
+        setShowSuccess(true)
+        setTimeout(() => setShowSuccess(false), 3000)
+      },
+    },
+  })
+
+  const handleSave = () => {
+    if (!validate()) return
+    updateMutation.mutate({
+      data: {
+        name: formValues.name,
+        email: formValues.email,
+        notifications: settingsData?.data.notifications ?? true,
+      },
+    })
+  }
+
+  const handleCancel = () => {
+    setFormValues(serverValues)
+    setErrors({})
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-7 w-20" />
+        <Separator />
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -84,9 +173,14 @@ function ProfileSection() {
           <Label htmlFor="settings-name">{t('settings.profile.name')}</Label>
           <Input
             id="settings-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formValues.name}
+            onChange={(e) =>
+              setFormValues((v) => ({ ...v, name: e.target.value }))
+            }
           />
+          {errors.name && (
+            <p className="text-sm text-destructive">{errors.name}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -94,10 +188,44 @@ function ProfileSection() {
           <Input
             id="settings-email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formValues.email}
+            onChange={(e) =>
+              setFormValues((v) => ({ ...v, email: e.target.value }))
+            }
           />
+          {errors.email && (
+            <p className="text-sm text-destructive">{errors.email}</p>
+          )}
         </div>
+      </div>
+
+      {updateMutation.isError && (
+        <p className="text-sm text-destructive">
+          {t('settings.profile.saveError')}
+        </p>
+      )}
+      {showSuccess && (
+        <p className="text-sm text-green-600">
+          {t('settings.profile.saveSuccess')}
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <Button
+          onClick={handleSave}
+          disabled={!isDirty || updateMutation.isPending}
+        >
+          {updateMutation.isPending
+            ? t('common.loading')
+            : t('settings.profile.save')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={handleCancel}
+          disabled={!isDirty || updateMutation.isPending}
+        >
+          {t('settings.profile.cancel')}
+        </Button>
       </div>
     </div>
   )
@@ -105,7 +233,40 @@ function ProfileSection() {
 
 function NotificationsSection() {
   const { t } = useTranslation()
-  const [notifications, setNotifications] = React.useState(true)
+  const queryClient = useQueryClient()
+  const { data: settingsData, isLoading } = useGetUserSettings()
+
+  const serverValue = settingsData?.data.notifications ?? true
+  const [notifications, setNotifications] = React.useState(serverValue)
+
+  React.useEffect(() => {
+    setNotifications(serverValue)
+  }, [serverValue])
+
+  const updateMutation = useUpdateUserSettings({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: getGetUserSettingsQueryKey(),
+        })
+      },
+    },
+  })
+
+  const handleToggle = (checked: boolean) => {
+    setNotifications(checked)
+    updateMutation.mutate({
+      data: {
+        name: settingsData?.data.name ?? '',
+        email: settingsData?.data.email ?? '',
+        notifications: checked,
+      },
+    })
+  }
+
+  if (isLoading) {
+    return <Skeleton className="h-20 w-full" />
+  }
 
   return (
     <div className="space-y-6">
@@ -126,7 +287,8 @@ function NotificationsSection() {
         <Switch
           id="settings-notifications"
           checked={notifications}
-          onCheckedChange={setNotifications}
+          onCheckedChange={handleToggle}
+          disabled={updateMutation.isPending}
         />
       </div>
     </div>

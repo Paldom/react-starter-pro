@@ -18,6 +18,20 @@ export default defineConfig({
           path: 'src/shared/api/client.ts',
           name: 'customInstance',
         },
+        operations: {
+          listProjects: {
+            query: { useInfinite: true, useInfiniteQueryParam: 'cursor' },
+          },
+          listProjectChats: {
+            query: { useInfinite: true, useInfiniteQueryParam: 'cursor' },
+          },
+          searchChats: {
+            query: { useInfinite: true, useInfiniteQueryParam: 'cursor' },
+          },
+          listDocuments: {
+            query: { useInfinite: true, useInfiniteQueryParam: 'cursor' },
+          },
+        },
       },
     },
   },

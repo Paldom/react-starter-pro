@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from '@/app/app'
-import i18n from './i18n'
+import { i18nInit } from './i18n'
 import './index.css'
 import type { SetupWorker } from 'msw/browser'
 
@@ -31,10 +31,11 @@ if (!rootElement) {
 }
 
 await enableMocks()
+await i18nInit
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <Suspense fallback={<div>{i18n.t('common.loadingTranslations')}</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <App />
     </Suspense>
   </React.StrictMode>

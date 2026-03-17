@@ -10,6 +10,7 @@
     "searchChats": "Search chats",
     "searchPlaceholder": "Search chats...",
     "noResults": "No chats found.",
+    "recentChats": "Recent chats",
     "share": "Share",
     "rename": "Rename",
     "duplicate": "Duplicate",
@@ -46,7 +47,13 @@
     "profile": {
       "title": "Profile",
       "name": "Name",
-      "email": "Email"
+      "email": "Email",
+      "save": "Save",
+      "cancel": "Cancel",
+      "nameRequired": "Name is required",
+      "emailInvalid": "Please enter a valid email address",
+      "saveError": "Failed to save settings. Please try again.",
+      "saveSuccess": "Settings saved successfully."
     },
     "notifications": {
       "title": "Notifications",
@@ -74,6 +81,7 @@
     "close": "Close",
     "loadingApplication": "Loading application...",
     "loadingTranslations": "Loading translations...",
+    "loadMore": "Load more",
     "openMenu": "Open menu",
     "more": "More",
     "units": {

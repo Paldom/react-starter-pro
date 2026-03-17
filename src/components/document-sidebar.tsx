@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {
   CheckCircle2,
   Clock,
@@ -5,17 +6,23 @@ import {
   Trash2,
   X,
   FileText,
+  Loader2,
 } from 'lucide-react'
 import { useTranslation } from '@/i18n/client'
-import {
-  useUIStore,
-  type Document,
-  type DocumentStatus,
-} from '@/shared/store/ui'
+import { useUIStore } from '@/shared/store/ui'
 import { Button } from '@/components/ui/button'
 import { Dropzone } from '@/components/ui/dropzone'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import type { TFunction } from 'i18next'
+import {
+  useListDocuments,
+  useUploadDocument,
+  useDeleteDocument,
+  getListDocumentsQueryKey,
+} from '@/shared/api/generated/documents/documents'
+import type { Document, DocumentStatus } from '@/shared/api/generated/models'
+import { useQueryClient } from '@tanstack/react-query'
 
 function formatFileSize(bytes: number, t: TFunction): string {
   if (bytes === 0) return `0 ${t('common.units.byte')}`
@@ -47,15 +54,15 @@ type DocumentItemProps = Readonly<{
   document: Document
   formatSize: (bytes: number) => string
   removeLabel: string
+  onRemove: (documentId: string) => void
 }>
 
 function DocumentItem({
   document,
   formatSize,
   removeLabel,
+  onRemove,
 }: DocumentItemProps) {
-  const { removeDocument } = useUIStore()
-
   return (
     <div className="group flex items-center gap-3 rounded-md border bg-card p-3">
       <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -70,7 +77,7 @@ function DocumentItem({
         variant="ghost"
         size="icon"
         className="h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-        onClick={() => removeDocument(document.id)}
+        onClick={() => onRemove(document.id)}
       >
         <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
         <span className="sr-only">{removeLabel}</span>
@@ -81,16 +88,53 @@ function DocumentItem({
 
 export function DocumentSidebar() {
   const { t } = useTranslation()
-  const {
-    documents,
-    documentSidebarOpen,
-    setDocumentSidebarOpen,
-    addDocument,
-  } = useUIStore()
+  const queryClient = useQueryClient()
+  const { documentSidebarOpen, setDocumentSidebarOpen } = useUIStore()
   const formatSize = (bytes: number) => formatFileSize(bytes, t)
 
+  const documentsQuery = useListDocuments()
+  const documents = documentsQuery.data?.data.items ?? []
+  const hasPending = documents.some((d) => d.status === 'pending')
+
+  // Poll while any document is pending
+  React.useEffect(() => {
+    if (!hasPending) return
+    const interval = setInterval(() => {
+      void queryClient.invalidateQueries({
+        queryKey: getListDocumentsQueryKey(),
+      })
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [hasPending, queryClient])
+
+  const uploadMutation = useUploadDocument({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: getListDocumentsQueryKey(),
+        })
+      },
+    },
+  })
+
+  const deleteMutation = useDeleteDocument({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: getListDocumentsQueryKey(),
+        })
+      },
+    },
+  })
+
   const handleFilesAdded = (files: File[]) => {
-    files.forEach((file) => addDocument(file))
+    files.forEach((file) => {
+      uploadMutation.mutate({ data: { file } })
+    })
+  }
+
+  const handleRemove = (documentId: string) => {
+    deleteMutation.mutate({ documentId })
   }
 
   if (!documentSidebarOpen) return null
@@ -111,7 +155,15 @@ export function DocumentSidebar() {
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden p-4">
-        {documents.length > 0 && (
+        {documentsQuery.isLoading && (
+          <div className="mb-4 space-y-2">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-md" />
+            ))}
+          </div>
+        )}
+
+        {!documentsQuery.isLoading && documents.length > 0 && (
           <div className="mb-4 shrink-0 space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               {t('document.addedDocuments')} ({documents.length})
@@ -123,9 +175,17 @@ export function DocumentSidebar() {
                   document={doc}
                   formatSize={formatSize}
                   removeLabel={t('document.removeDocument')}
+                  onRemove={handleRemove}
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {uploadMutation.isPending && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t('common.loading')}
           </div>
         )}
 

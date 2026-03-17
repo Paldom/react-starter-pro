@@ -1,37 +1,37 @@
-import { initialProjects } from '@/lib/chat-data'
 import { useUIStore } from '@/shared/store/ui'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 
-const initialDocumentsSnapshot = useUIStore
-  .getState()
-  .documents.map((doc) => ({ ...doc }))
-
-export function cloneProjects() {
-  return initialProjects.map((project) => ({
-    ...project,
-    chats: project.chats.map((chat) => ({ ...chat })),
-  }))
+export function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+      mutations: { retry: false },
+    },
+  })
 }
 
-export function cloneDocuments() {
-  return initialDocumentsSnapshot.map((doc) => ({ ...doc }))
+export function TestQueryWrapper({
+  children,
+}: Readonly<{ children: ReactNode }>) {
+  const queryClient = createTestQueryClient()
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 }
 
 export function resetUIStore(
   overrides: Partial<ReturnType<typeof useUIStore.getState>> = {}
 ) {
-  const projects = cloneProjects()
-  const documents = cloneDocuments()
   useUIStore.persist?.clearStorage?.()
   useUIStore.setState({
     sidebarCollapsed: false,
     theme: 'light',
-    projects,
-    activeProjectId: projects[0]?.id ?? null,
-    activeChatId: projects[0]?.chats[0]?.id ?? null,
+    activeProjectId: null,
+    activeChatId: null,
     searchDialogOpen: false,
     settingsDialogOpen: false,
     documentSidebarOpen: false,
-    documents,
     ...overrides,
   })
 }

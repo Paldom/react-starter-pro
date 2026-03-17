@@ -7,7 +7,7 @@ export function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
-  if (typeof globalThis.window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     const token = globalThis.localStorage.getItem('authToken')
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
