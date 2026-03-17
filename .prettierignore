@@ -11,3 +11,4 @@ yarn.lock
 src/shared/api/generated
 .local
 public/locales
+public/mockServiceWorker.js

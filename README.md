@@ -39,18 +39,19 @@ src/
 │   ├── chat-search-dialog.tsx     # Command palette search
 │   ├── settings-dialog.tsx        # Settings modal
 │   ├── document-sidebar.tsx       # Document upload panel
+│   ├── language-switcher.tsx      # Language selection dropdown
 │   ├── app-header.tsx
 │   ├── app-sidebar.tsx
+│   ├── app-route-error.tsx        # Route error boundary
 │   └── ui/                        # shadcn/ui primitives
 │
-├── hooks/                        # shadcn-provided hooks (e.g. use-mobile)
+├── hooks/                        # Reusable hooks (use-mobile, use-debounced-value)
 ├── lib/                          # Local utilities + assistant adapter
 │   ├── assistant/                 # Chat streaming adapter
 │   │   ├── chat-model-adapter.ts  # ChatModelAdapter (async generator → NDJSON)
 │   │   ├── ndjson-parser.ts       # ReadableStream → parsed JSON async generator
 │   │   ├── get-auth-headers.ts    # Auth header helper for native fetch
 │   │   └── use-chat-runtime.ts    # useLocalRuntime hook
-│   ├── chat-data.ts               # Sample project/chat data
 │   └── utils.ts
 │
 ├── shared/                       # Cross-cutting reusable code
@@ -219,7 +220,7 @@ If you update `openapi/openapi.yaml`, run `npm run api:gen` and commit the regen
 - **@assistant-ui/react 0.12.3** - Assistant UI primitives (LocalRuntime + custom NDJSON adapter)
 - **TanStack Query 5.90.20** - Server state
 - **Zustand 5.0.11** - Client state
-- **React Router 7.13.0** - Routing
+- **React Router DOM 7.13.0** - Routing
 - **Tailwind CSS 4.1.18** - Styling
 - **i18next 25.8.1** - Internationalization
 - **react-i18next 16.5.4** - React i18n integration
