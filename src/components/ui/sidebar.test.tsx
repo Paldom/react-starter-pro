@@ -103,6 +103,28 @@ describe('ui/sidebar', () => {
     await user.click(trigger as HTMLElement)
   })
 
+  it('toggles sidebar with keyboard shortcut', async () => {
+    const user = userEvent.setup()
+    const onOpenChange = vi.fn()
+
+    render(
+      <SidebarProvider open onOpenChange={onOpenChange}>
+        <Sidebar>
+          <SidebarContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton>Item</SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
+      </SidebarProvider>
+    )
+
+    await user.keyboard('{Control>}b{/Control}')
+    expect(onOpenChange).toHaveBeenCalled()
+  })
+
   it('supports controlled open state via onOpenChange', async () => {
     const user = userEvent.setup()
     const onOpenChange = vi.fn()

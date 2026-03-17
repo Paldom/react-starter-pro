@@ -163,6 +163,116 @@ describe('chatModelAdapter', () => {
     expect(capturedHeaders?.get('Authorization')).toBe('Bearer test-token-123')
   })
 
+  it('throws when response body is null', async () => {
+    server.use(
+      http.post('*/api/chat/stream', () => {
+        return new HttpResponse(null, {
+          status: 200,
+          headers: { 'Content-Type': 'application/x-ndjson' },
+        })
+      })
+    )
+
+    await expect(
+      consumeGenerator(chatModelAdapter.run(makeRunOptions()))
+    ).rejects.toThrow('Chat stream response has no body')
+  })
+
+  it('handles tool-call-begin and tool-call-delta events without yielding', async () => {
+    server.use(
+      getChatStreamMockHandler(
+        () =>
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({
+                  type: 'tool-call-begin',
+                  tool_call_id: 'tc1',
+                  tool_name: 'search',
+                })
+              )
+              controller.enqueue(
+                ndjsonLine({
+                  type: 'tool-call-delta',
+                  tool_call_id: 'tc1',
+                  args_delta: '{"q":"hello"}',
+                })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'done', finish_reason: 'stop' })
+              )
+              controller.close()
+            },
+          })
+      )
+    )
+
+    const results = await consumeGenerator(
+      chatModelAdapter.run(makeRunOptions())
+    )
+    expect(results).toHaveLength(0)
+  })
+
+  it('ignores tool-call-delta for unknown tool_call_id', async () => {
+    server.use(
+      getChatStreamMockHandler(
+        () =>
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({
+                  type: 'tool-call-delta',
+                  tool_call_id: 'unknown',
+                  args_delta: 'ignored',
+                })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'text-delta', delta: 'ok' })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'done', finish_reason: 'stop' })
+              )
+              controller.close()
+            },
+          })
+      )
+    )
+
+    const results = await consumeGenerator(
+      chatModelAdapter.run(makeRunOptions())
+    )
+    expect(results).toHaveLength(1)
+    expect(results[0]).toEqual({ content: [{ type: 'text', text: 'ok' }] })
+  })
+
+  it('ignores unknown event types', async () => {
+    server.use(
+      getChatStreamMockHandler(
+        () =>
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({ type: 'some-future-event', data: 'test' })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'text-delta', delta: 'Hi' })
+              )
+              controller.enqueue(
+                ndjsonLine({ type: 'done', finish_reason: 'stop' })
+              )
+              controller.close()
+            },
+          })
+      )
+    )
+
+    const results = await consumeGenerator(
+      chatModelAdapter.run(makeRunOptions())
+    )
+    expect(results).toHaveLength(1)
+    expect(results[0]).toEqual({ content: [{ type: 'text', text: 'Hi' }] })
+  })
+
   it('serializes only text parts from messages', async () => {
     let capturedBody: Record<string, unknown> | undefined
 
