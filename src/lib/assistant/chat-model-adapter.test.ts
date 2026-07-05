@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import { server } from '@/mocks/server'
 import { getChatStreamMockHandler } from '@/mocks/chat-stream-handler'
 import { http, HttpResponse } from 'msw'
@@ -35,15 +35,10 @@ function makeRunOptions(
     messages: [msg],
     abortSignal: new AbortController().signal,
     runConfig: {},
-    context: {
-      useModelConfig: () => ({}),
-    },
-    config: {
-      useModelConfig: () => ({}),
-    },
+    context: {},
     unstable_getMessage: () => msg,
     ...overrides,
-  } as ChatModelRunOptions
+  }
 }
 
 async function consumeGenerator(
@@ -65,6 +60,7 @@ describe('chatModelAdapter', () => {
 
   afterEach(() => {
     globalThis.localStorage.removeItem('authToken')
+    vi.unstubAllEnvs()
   })
 
   it('yields cumulative text content from text-delta events', async () => {
@@ -178,7 +174,7 @@ describe('chatModelAdapter', () => {
     ).rejects.toThrow('Chat stream response has no body')
   })
 
-  it('handles tool-call-begin and tool-call-delta events without yielding', async () => {
+  it('yields tool-call parts with accumulated args from tool-call events', async () => {
     server.use(
       getChatStreamMockHandler(
         () =>
@@ -195,7 +191,14 @@ describe('chatModelAdapter', () => {
                 ndjsonLine({
                   type: 'tool-call-delta',
                   tool_call_id: 'tc1',
-                  args_delta: '{"q":"hello"}',
+                  args_delta: '{"q":',
+                })
+              )
+              controller.enqueue(
+                ndjsonLine({
+                  type: 'tool-call-delta',
+                  tool_call_id: 'tc1',
+                  args_delta: '"hello"}',
                 })
               )
               controller.enqueue(
@@ -210,10 +213,45 @@ describe('chatModelAdapter', () => {
     const results = await consumeGenerator(
       chatModelAdapter.run(makeRunOptions())
     )
-    expect(results).toHaveLength(0)
+
+    expect(results).toHaveLength(3)
+    expect(results[0]).toEqual({
+      content: [
+        {
+          type: 'tool-call',
+          toolCallId: 'tc1',
+          toolName: 'search',
+          args: {},
+          argsText: '',
+        },
+      ],
+    })
+    // Partial JSON: argsText accumulates, args stays {} until parseable
+    expect(results[1]).toEqual({
+      content: [
+        {
+          type: 'tool-call',
+          toolCallId: 'tc1',
+          toolName: 'search',
+          args: {},
+          argsText: '{"q":',
+        },
+      ],
+    })
+    expect(results[2]).toEqual({
+      content: [
+        {
+          type: 'tool-call',
+          toolCallId: 'tc1',
+          toolName: 'search',
+          args: { q: 'hello' },
+          argsText: '{"q":"hello"}',
+        },
+      ],
+    })
   })
 
-  it('ignores tool-call-delta for unknown tool_call_id', async () => {
+  it('yields text and tool-call parts together, dropping deltas for unknown tool calls', async () => {
     server.use(
       getChatStreamMockHandler(
         () =>
@@ -224,6 +262,13 @@ describe('chatModelAdapter', () => {
                   type: 'tool-call-delta',
                   tool_call_id: 'unknown',
                   args_delta: 'ignored',
+                })
+              )
+              controller.enqueue(
+                ndjsonLine({
+                  type: 'tool-call-begin',
+                  tool_call_id: 'tc1',
+                  tool_name: 'lookup',
                 })
               )
               controller.enqueue(
@@ -241,8 +286,21 @@ describe('chatModelAdapter', () => {
     const results = await consumeGenerator(
       chatModelAdapter.run(makeRunOptions())
     )
-    expect(results).toHaveLength(1)
-    expect(results[0]).toEqual({ content: [{ type: 'text', text: 'ok' }] })
+
+    // The orphan delta yields nothing; begin and text-delta yield once each
+    expect(results).toHaveLength(2)
+    expect(results[1]).toEqual({
+      content: [
+        { type: 'text', text: 'ok' },
+        {
+          type: 'tool-call',
+          toolCallId: 'tc1',
+          toolName: 'lookup',
+          args: {},
+          argsText: '',
+        },
+      ],
+    })
   })
 
   it('ignores unknown event types', async () => {
@@ -272,6 +330,43 @@ describe('chatModelAdapter', () => {
     expect(results).toHaveLength(1)
     expect(results[0]).toEqual({ content: [{ type: 'text', text: 'Hi' }] })
   })
+
+  it.each([
+    ['/', '/chat/stream'],
+    ['/api/', '/api/chat/stream'],
+  ])(
+    'strips trailing slashes from API base %s when building the URL',
+    async (base, expectedPath) => {
+      vi.stubEnv('VITE_API_BASE_URL', base)
+      vi.resetModules()
+      const { chatModelAdapter: adapter } = await import('./chat-model-adapter')
+
+      let capturedUrl: string | undefined
+      server.use(
+        http.post('*/chat/stream', ({ request }) => {
+          capturedUrl = request.url
+
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                ndjsonLine({ type: 'done', finish_reason: 'stop' })
+              )
+              controller.close()
+            },
+          })
+
+          return new HttpResponse(stream, {
+            headers: { 'Content-Type': 'application/x-ndjson' },
+          })
+        })
+      )
+
+      await consumeGenerator(adapter.run(makeRunOptions()))
+
+      expect(capturedUrl).toBeDefined()
+      expect(new URL(capturedUrl!).pathname).toBe(expectedPath)
+    }
+  )
 
   it('serializes only text parts from messages', async () => {
     let capturedBody: Record<string, unknown> | undefined

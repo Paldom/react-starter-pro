@@ -2,61 +2,13 @@ openapi: 3.0.0
 info:
   title: Application API
   version: 1.0.0
-  description: API for assistant workspace, dashboard, settings, and chat streaming
+  description: API for assistant workspace, settings, and chat streaming
 
 servers:
   - url: /api
     description: Development server
 
 paths:
-  /dashboard/stats:
-    get:
-      summary: Get dashboard statistics
-      operationId: getDashboardStats
-      tags:
-        - dashboard
-      responses:
-        '200':
-          description: Dashboard statistics
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DashboardStats'
-              example:
-                totalRevenue: 125000
-                subscriptions: 1234
-                sales: 5678
-                activeUsers: 2345
-
-  /dashboard/chart:
-    get:
-      summary: Get dashboard chart data
-      operationId: getDashboardChart
-      tags:
-        - dashboard
-      responses:
-        '200':
-          description: Dashboard chart data
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ChartDataPoint'
-              example:
-                - name: 'Jan'
-                  value: 4000
-                - name: 'Feb'
-                  value: 3000
-                - name: 'Mar'
-                  value: 5000
-                - name: 'Apr'
-                  value: 4500
-                - name: 'May'
-                  value: 6000
-                - name: 'Jun'
-                  value: 5500
-
   /chat/stream:
     post:
       summary: Stream chat completion
@@ -315,6 +267,37 @@ paths:
         '204':
           description: Chat deleted
 
+  /chats/{chatId}/messages:
+    get:
+      summary: List messages in a chat
+      operationId: listChatMessages
+      tags:
+        - chats
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Messages in the chat, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+              example:
+                - id: 'msg-1'
+                  role: 'user'
+                  content: 'Summarize the Q1 metrics'
+                  createdAt: '2024-01-15T10:00:00Z'
+                - id: 'msg-2'
+                  role: 'assistant'
+                  content: 'Q1 revenue grew 12% quarter over quarter.'
+                  createdAt: '2024-01-15T10:00:05Z'
+
   /chats/search:
     get:
       summary: Search chats across all projects
@@ -554,34 +537,6 @@ paths:
 
 components:
   schemas:
-    DashboardStats:
-      type: object
-      properties:
-        totalRevenue:
-          type: number
-        subscriptions:
-          type: number
-        sales:
-          type: number
-        activeUsers:
-          type: number
-      required:
-        - totalRevenue
-        - subscriptions
-        - sales
-        - activeUsers
-
-    ChartDataPoint:
-      type: object
-      properties:
-        name:
-          type: string
-        value:
-          type: number
-      required:
-        - name
-        - value
-
     UserSettings:
       type: object
       properties:
@@ -804,6 +759,27 @@ components:
         - projectId
         - createdAt
         - updatedAt
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - role
+        - content
+        - createdAt
 
     ChatSearchResult:
       type: object

@@ -4,7 +4,9 @@ A production-ready React starter that ships with a complete assistant/chat UI sa
 
 ## Features
 
-- Assistant UI thread with streaming responses (custom NDJSON adapter over LocalRuntime)
+- Assistant UI thread with streaming responses (custom NDJSON adapter over LocalRuntime — see [docs/assistant-ui.md](docs/assistant-ui.md))
+- Markdown rendering of assistant messages (GFM + code blocks with copy button) and tool-call rendering
+- Chat history hydration — selecting a chat loads its messages from the API
 - Command palette search (`Cmd/Ctrl+K`) and settings (`Cmd/Ctrl+,`)
 - Document upload sidebar with drag-and-drop
 - Type-safe API client generation (OpenAPI + Orval)
@@ -14,7 +16,8 @@ A production-ready React starter that ships with a complete assistant/chat UI sa
 - Storybook with shadcn/ui story registry
 - MSW for API mocking in development and tests
 - 80% test coverage with Vitest + mutation testing
-- TypeScript strict mode with ESLint flat config
+- TypeScript strict mode with ESLint flat config (typed linting + @eslint-react + react-hooks)
+- Pre-commit linting/formatting via husky + lint-staged
 - Enforced import boundaries for `src/shared` via ESLint
 - Vendor chunk splitting in Vite build
 - Automated CI with GitHub Actions
@@ -31,7 +34,7 @@ src/
 │   ├── providers/                # Query client + Suspense boundary
 │   ├── router/                   # Route definitions
 │   ├── hooks/                    # App-level effects (theme, language)
-│   └── App.tsx                   # Root application component
+│   └── app.tsx                   # Root application component
 │
 ├── components/                   # App-level UI
 │   ├── assistant-thread.tsx       # Assistant UI thread + composer
@@ -43,6 +46,7 @@ src/
 │   ├── app-header.tsx
 │   ├── app-sidebar.tsx
 │   ├── app-route-error.tsx        # Route error boundary
+│   ├── assistant-ui/              # Markdown + tool-call rendering for the thread
 │   └── ui/                        # shadcn/ui primitives
 │
 ├── hooks/                        # Reusable hooks (use-mobile, use-debounced-value)
@@ -50,7 +54,6 @@ src/
 │   ├── assistant/                 # Chat streaming adapter
 │   │   ├── chat-model-adapter.ts  # ChatModelAdapter (async generator → NDJSON)
 │   │   ├── ndjson-parser.ts       # ReadableStream → parsed JSON async generator
-│   │   ├── get-auth-headers.ts    # Auth header helper for native fetch
 │   │   └── use-chat-runtime.ts    # useLocalRuntime hook
 │   └── utils.ts
 │
@@ -58,7 +61,6 @@ src/
 │   ├── api/                      # Axios client + Orval-generated hooks + models
 │   └── store/                    # Zustand UI state
 │
-├── i18n/                         # i18n config + client helpers
 ├── i18n.ts                       # i18next initialization
 ├── i18next.d.ts                  # TypeScript type definitions
 │
@@ -85,7 +87,7 @@ orval.config.ts                   # Orval client generation
 
 ## Getting Started
 
-**Prerequisites:** Node.js 24+ recommended (CI uses 24). Vite 7 requires Node 20.19+ or 22.12+.
+**Prerequisites:** Node.js 24+ recommended (CI uses 24; Vite 8 requires Node 20.19+ or 22.12+).
 
 ```bash
 # Install dependencies
@@ -214,24 +216,23 @@ If you update `openapi/openapi.yaml`, run `npm run api:gen` and commit the regen
 
 ## Tech Stack
 
-- **React 19.2.4** - UI library
-- **TypeScript 5.9.3** - Type safety
-- **Vite 7.3.1** - Build tool
-- **@assistant-ui/react 0.12.3** - Assistant UI primitives (LocalRuntime + custom NDJSON adapter)
-- **TanStack Query 5.90.20** - Server state
-- **Zustand 5.0.11** - Client state
-- **React Router DOM 7.13.0** - Routing
-- **Tailwind CSS 4.1.18** - Styling
-- **i18next 25.8.1** - Internationalization
-- **react-i18next 16.5.4** - React i18n integration
-- **React Hook Form 7.71.1** - Forms
-- **Zod 4.3.6** - Schema validation
-- **Orval 8.2.0** - OpenAPI code generation
-- **Axios 1.13.4** - HTTP client
-- **Vitest 4.0.18** - Testing framework
-- **MSW 2.12.7** - API mocking
-- **Stryker 9.5.1** - Mutation testing
-- **Storybook 10.2.4** - Component documentation
+- **React 19** - UI library
+- **TypeScript 6** - Type safety
+- **Vite 8** - Build tool
+- **@assistant-ui/react 0.14** - Assistant UI primitives (LocalRuntime + custom NDJSON adapter)
+- **TanStack Query 5** - Server state
+- **Zustand 5** - Client state
+- **React Router DOM 7** - Routing
+- **Tailwind CSS 4** - Styling
+- **i18next 26 / react-i18next 17** - Internationalization
+- **React Hook Form 7** - Forms
+- **Zod 4** - Schema validation
+- **Orval 8** - OpenAPI code generation
+- **Axios 1** - HTTP client
+- **Vitest 4** - Testing framework
+- **MSW 2** - API mocking
+- **Stryker 9** - Mutation testing
+- **Storybook 10** - Component documentation
 
 ## License
 

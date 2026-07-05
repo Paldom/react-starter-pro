@@ -2,6 +2,8 @@ import type {
   ChatModelAdapter,
   ChatModelRunOptions,
   TextMessagePart,
+  ThreadAssistantMessagePart,
+  ToolCallMessagePart,
 } from '@assistant-ui/react'
 import type {
   ChatStreamEvent,
@@ -9,9 +11,49 @@ import type {
   ChatStreamMessage,
 } from '@/shared/api/generated/models'
 import { parseNDJSON } from './ndjson-parser'
-import { getAuthHeaders } from './get-auth-headers'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(
+  /\/+$/,
+  ''
+)
+
+/**
+ * Headers for the streaming fetch request.
+ * Mirrors the auth logic from src/shared/api/client.ts
+ * for use with native fetch instead of Axios.
+ */
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (globalThis.window !== undefined) {
+    const token = globalThis.localStorage.getItem('authToken')
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+  return headers
+}
+
+/**
+ * Best-effort parse of streamed tool-call argument text.
+ * Returns {} while the JSON is still partial or is not an object.
+ */
+function parseArgs(argsText: string): ToolCallMessagePart['args'] {
+  try {
+    const parsed: unknown = JSON.parse(argsText)
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed)
+    ) {
+      return parsed as ToolCallMessagePart['args']
+    }
+  } catch {
+    // partial JSON during streaming
+  }
+  return {}
+}
 
 /**
  * Serialize assistant-ui ThreadMessage[] to the wire format.
@@ -57,6 +99,23 @@ export const chatModelAdapter: ChatModelAdapter = {
     let textContent = ''
     const toolCalls = new Map<string, { toolName: string; argsText: string }>()
 
+    const buildContent = (): ThreadAssistantMessagePart[] => {
+      const parts: ThreadAssistantMessagePart[] = []
+      if (textContent) {
+        parts.push({ type: 'text', text: textContent })
+      }
+      for (const [toolCallId, { toolName, argsText }] of toolCalls) {
+        parts.push({
+          type: 'tool-call',
+          toolCallId,
+          toolName,
+          args: parseArgs(argsText),
+          argsText,
+        })
+      }
+      return parts
+    }
+
     for await (const event of parseNDJSON<ChatStreamEvent>(
       res.body,
       abortSignal
@@ -64,7 +123,7 @@ export const chatModelAdapter: ChatModelAdapter = {
       switch (event.type) {
         case 'text-delta':
           textContent += event.delta
-          yield { content: [{ type: 'text' as const, text: textContent }] }
+          yield { content: buildContent() }
           break
 
         case 'tool-call-begin':
@@ -72,11 +131,16 @@ export const chatModelAdapter: ChatModelAdapter = {
             toolName: event.tool_name,
             argsText: '',
           })
+          yield { content: buildContent() }
           break
 
         case 'tool-call-delta': {
-          const tc = toolCalls.get(event.tool_call_id)
-          if (tc) tc.argsText += event.args_delta
+          const toolCall = toolCalls.get(event.tool_call_id)
+          // Deltas for unknown tool calls (no preceding begin) are dropped
+          if (toolCall) {
+            toolCall.argsText += event.args_delta
+            yield { content: buildContent() }
+          }
           break
         }
 

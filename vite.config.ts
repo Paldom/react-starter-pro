@@ -22,9 +22,19 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'query-vendor': ['@tanstack/react-query'],
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined
+          if (
+            /[\\/](react|react-dom|scheduler|react-router[^\\/]*)[\\/]/.test(id)
+          )
+            return 'react-vendor'
+          if (id.includes('@tanstack')) return 'query-vendor'
+          if (id.includes('@assistant-ui') || id.includes('assistant-stream'))
+            return 'assistant-vendor'
+          if (id.includes('radix-ui') || id.includes('lucide-react'))
+            return 'ui-vendor'
+          if (id.includes('i18next')) return 'i18n-vendor'
+          return undefined
         },
       },
     },
@@ -41,12 +51,10 @@ export default defineConfig({
       exclude: [
         'src/**/*.test.{ts,tsx}',
         'src/**/*.stories.{ts,tsx}',
-        'src/stories/**',
         '**/.stryker-tmp/**',
         'src/main.tsx',
         'src/mocks/**',
         'src/shared/api/generated/**',
-        'src/shared/types/**',
         'src/vite-env.d.ts',
         'src/**/*.d.ts',
       ],

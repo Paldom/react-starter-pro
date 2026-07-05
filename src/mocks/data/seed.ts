@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import type {
   Project,
   Chat,
+  ChatMessage,
   Document,
   UserSettings,
   ChatSearchResult,
@@ -13,12 +14,11 @@ export function paginateArray<T extends { id: string }>(
   cursor: string | null | undefined,
   limit: number
 ): { items: T[]; nextCursor: string | null; hasMore: boolean } {
-  const startIndex = cursor
-    ? items.findIndex((item) => item.id === cursor) + 1
-    : 0
-  if (startIndex < 0) {
+  const idx = cursor ? items.findIndex((item) => item.id === cursor) : -1
+  if (cursor && idx === -1) {
     return { items: [], nextCursor: null, hasMore: false }
   }
+  const startIndex = idx + 1
   const slice = items.slice(startIndex, startIndex + limit)
   const hasMore = startIndex + limit < items.length
   const nextCursor = hasMore ? (slice[slice.length - 1]?.id ?? null) : null
@@ -33,6 +33,17 @@ function createChat(projectId: string, daysAgo: number): Chat {
     createdAt: faker.date.recent({ days: daysAgo + 30 }).toISOString(),
     updatedAt: faker.date.recent({ days: Math.max(daysAgo, 1) }).toISOString(),
   }
+}
+
+function createChatMessages(chat: Chat): ChatMessage[] {
+  const count = faker.number.int({ min: 2, max: 6 })
+  const startedAt = new Date(chat.createdAt).getTime()
+  return Array.from({ length: count }, (_, i) => ({
+    id: faker.string.uuid(),
+    role: i % 2 === 0 ? ('user' as const) : ('assistant' as const),
+    content: faker.lorem.sentences({ min: 1, max: 2 }),
+    createdAt: new Date(startedAt + i * 60_000).toISOString(),
+  }))
 }
 
 function createProject(index: number): {
@@ -63,7 +74,7 @@ function createDocument(index: number): Document {
     md: 'text/markdown',
     txt: 'text/plain',
   }
-  const ext = extensions[index % extensions.length]
+  const ext = extensions[index % extensions.length]!
   const statuses: DocumentStatus[] = [
     'ingested',
     'ingested',
@@ -74,8 +85,8 @@ function createDocument(index: number): Document {
     id: faker.string.uuid(),
     name: faker.system.commonFileName(ext),
     size: faker.number.int({ min: 1024, max: 10 * 1024 * 1024 }),
-    type: mimeTypes[ext],
-    status: statuses[index % statuses.length],
+    type: mimeTypes[ext]!,
+    status: statuses[index % statuses.length]!,
     projectId: null,
     addedAt: faker.date.recent({ days: index + 1 }).toISOString(),
   }
@@ -85,6 +96,7 @@ class MockDb {
   projects: Project[] = []
   chats: Map<string, Chat[]> = new Map()
   allChats: Chat[] = []
+  chatMessages: Map<string, ChatMessage[]> = new Map()
   documents: Document[] = []
   settings: UserSettings = {
     name: 'John Doe',
@@ -93,26 +105,15 @@ class MockDb {
   }
 
   constructor() {
-    this.reset()
-  }
-
-  reset() {
-    this.projects = []
-    this.chats = new Map()
-    this.allChats = []
-    this.documents = []
-    this.settings = {
-      name: 'John Doe',
-      email: 'john@example.com',
-      notifications: true,
-    }
-
     const projectCount = faker.number.int({ min: 5, max: 8 })
     for (let i = 0; i < projectCount; i++) {
       const { project, chats } = createProject(i)
       this.projects.push(project)
       this.chats.set(project.id, chats)
       this.allChats.push(...chats)
+      for (const chat of chats) {
+        this.chatMessages.set(chat.id, createChatMessages(chat))
+      }
     }
     // Sort all chats by updatedAt descending for recent queries
     this.allChats.sort(

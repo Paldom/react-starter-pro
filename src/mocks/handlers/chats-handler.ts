@@ -39,6 +39,18 @@ export const chatHandlers = [
     return HttpResponse.json(newChat, { status: 201 })
   }),
 
+  // ponytail: streamed messages are NOT persisted here — the stream adapter
+  // sends assistant-ui's internal unstable_threadId, which has no mapping to
+  // mock db chat ids, so hydration only reflects the seeded history.
+  http.get('*/api/chats/:chatId/messages', ({ params }) => {
+    const { chatId } = params as { chatId: string }
+    const chat = db.allChats.find((c) => c.id === chatId)
+    if (!chat) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json(db.chatMessages.get(chatId) ?? [])
+  }),
+
   http.patch('*/api/chats/:chatId', async ({ params, request }) => {
     const { chatId } = params as { chatId: string }
     const body = (await request.json()) as UpdateChatRequest

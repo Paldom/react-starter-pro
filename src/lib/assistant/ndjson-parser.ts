@@ -46,6 +46,12 @@ export async function* parseNDJSON<T>(
     const parsed = tryParseLine<T>(buffer)
     if (parsed !== undefined) yield parsed
   } finally {
+    // No-op after normal completion; releases the HTTP connection on early exit
+    try {
+      await reader.cancel()
+    } catch {
+      // stream may already be errored/closed
+    }
     reader.releaseLock()
   }
 }

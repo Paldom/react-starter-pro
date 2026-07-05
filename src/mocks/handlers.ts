@@ -1,4 +1,3 @@
-import { getDashboardMock } from '@/shared/api/generated/dashboard/dashboard.msw'
 import { getChatStreamMockHandler } from './chat-stream-handler'
 import { projectHandlers } from './handlers/projects-handler'
 import { chatHandlers } from './handlers/chats-handler'
@@ -19,7 +18,6 @@ const settingsHandlers = [
 ]
 
 export const handlers = [
-  ...getDashboardMock(),
   ...settingsHandlers,
   getChatStreamMockHandler(),
   ...projectHandlers,
