@@ -2,6 +2,10 @@
 
 A production-ready React starter that ships with a complete assistant/chat UI sample, demonstrating scalable frontend patterns and tooling.
 
+[![CI](https://github.com/Paldom/react-starter-pro/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Paldom/react-starter-pro/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](package.json)
+
 ## Features
 
 - Assistant UI thread with streaming responses (custom NDJSON adapter over LocalRuntime — see [docs/assistant-ui.md](docs/assistant-ui.md))
@@ -236,4 +240,4 @@ If you update `openapi/openapi.yaml`, run `npm run api:gen` and commit the regen
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

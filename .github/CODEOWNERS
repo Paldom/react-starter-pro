@@ -1,0 +1,10 @@
+# Default owner for everything in the repo.
+* @Paldom
+
+# CI workflows and dependency automation get explicit owner review.
+/.github/ @Paldom
+/.github/workflows/ @Paldom
+/.github/dependabot.yml @Paldom
+
+# NOTE: CODEOWNERS is inert until a ruleset requires code-owner review
+# (Settings -> Rules -> require review from Code Owners).
