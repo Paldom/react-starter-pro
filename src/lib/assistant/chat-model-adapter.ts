@@ -12,9 +12,15 @@ import type {
 } from '@/shared/api/generated/models'
 import { parseNDJSON } from './ndjson-parser'
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(
-  /\/+$/,
-  ''
+/** Strip trailing slashes without regex backtracking (sonar S8786). */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length
+  while (end > 0 && value[end - 1] === '/') end--
+  return value.slice(0, end)
+}
+
+const API_BASE = stripTrailingSlashes(
+  import.meta.env.VITE_API_BASE_URL ?? '/api'
 )
 
 /**

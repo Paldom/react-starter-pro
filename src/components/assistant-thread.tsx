@@ -1,4 +1,5 @@
 import {
+  AuiIf,
   ThreadPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
@@ -70,13 +71,13 @@ function ThreadEmpty() {
   const { t } = useTranslation()
 
   return (
-    <ThreadPrimitive.Empty>
+    <AuiIf condition={(s) => s.thread.isEmpty}>
       <div className="flex h-full items-center justify-center">
         <p className="text-center text-sm text-muted-foreground">
           {t('chat.threadEmpty')}
         </p>
       </div>
-    </ThreadPrimitive.Empty>
+    </AuiIf>
   )
 }
 

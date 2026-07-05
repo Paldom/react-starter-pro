@@ -87,7 +87,7 @@ export const ShouldOnlyOpenOneWhenSingleType: Story = {
     }
 
     // Close the last opened tab
-    await userEvent.click(accordions[accordions.length - 1]!)
+    await userEvent.click(accordions.at(-1)!)
     await waitFor(() => expect(canvas.queryByRole('region')).toBeNull())
   },
 }

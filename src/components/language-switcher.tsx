@@ -12,8 +12,7 @@ export function LanguageSwitcher({ labelledById }: LanguageSwitcherProps) {
   const { i18n } = useTranslation()
 
   return (
-    <div
-      role="group"
+    <fieldset
       aria-labelledby={labelledById}
       className="inline-flex items-center rounded-md border border-input"
     >
@@ -44,6 +43,6 @@ export function LanguageSwitcher({ labelledById }: LanguageSwitcherProps) {
           </button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }
