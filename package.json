@@ -31,7 +31,7 @@
     "@assistant-ui/react-markdown": "^0.14.5",
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.20",
-    "axios": "^1.13.4",
+    "axios": "^1.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
